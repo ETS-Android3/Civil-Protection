@@ -1,0 +1,8 @@
+// Phones to server
+civil/clients/{id}/
+// Sensors to server
+civil/sensors/{id}/
+// Server to phones
+civil/server/{id}/
+// Server to sensors -- not used
+civil/server-sensors/{id}/
