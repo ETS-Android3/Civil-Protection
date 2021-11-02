@@ -1,4 +1,3 @@
-import com.opencsv.exceptions.CsvValidationException;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -14,16 +13,20 @@ import java.util.Scanner;
 
 public class Server {
 
-    public static void main(String[] args) throws ParserConfigurationException, IOException, CsvValidationException, SQLException, MqttException {
+    public static void main(String[] args) throws ParserConfigurationException, IOException, SQLException, MqttException {
 
         String inputPath = "inputFiles";
         String outputPath = "outputFiles";
         File inputDir = new File(inputPath);
         File outputDir = new File(outputPath);
+
         // Topics to listen to
-        String clientTopics = "civil/clients/#";
+        String clientPrefix = "civil/clients/";
+        String sensorTopics = "civil/sensors/";
         // Topics to write to
-        String serverTopics = "civil/server/#";
+        String sToClientsPrefix = "civil/server/";
+        /* *** Not to be used *** */
+        String sToSensorsPrefix = "civil/server-sensors/";
 
         if (!inputDir.exists()) throw new IOException("Cannot find input files. Aborting...");
 
@@ -62,13 +65,13 @@ public class Server {
         }
 
         // Subscribe to all client topics
-        try {
-            connection.subscribe("civil/clients/#", 2);
-            System.out.println("Successfully subscribed to " + clientTopics);
-        } catch (MqttException e) {
-            System.out.println("Failed to subscribe to " + clientTopics);
-            e.getMessage();
-        }
+        subscribe(connection, clientPrefix + "#");
+
+        // Subscribe to all sensor topics
+        subscribe(connection, sensorTopics + "#");
+
+        // Example publish
+        publish(connection, sToClientsPrefix + "test", "hello world!");
 
         System.out.println("Type \"shutdown\" at any time to shut down the Edge-Server");
         Scanner reader = new Scanner(System.in);
@@ -82,6 +85,28 @@ public class Server {
 
     public void onMessageArrived(String topic, MqttMessage message) {
         System.out.println("Received: \"" + message + "\" in topic " + topic);
+    }
+
+    private static void subscribe(MqttAsyncClient connection, String topic) {
+        try {
+            connection.subscribe(topic, 2);
+            System.out.println("Successfully subscribed to " + topic);
+        } catch (MqttException e) {
+            System.out.println("Failed to subscribe to " + topic);
+            e.getMessage();
+        }
+    }
+
+    private static void publish(MqttAsyncClient connection, String topic, String message) {
+        MqttMessage msg = new MqttMessage(message.getBytes());
+        msg.setQos(2);
+        try {
+            connection.publish(topic, msg);
+            System.out.println("Published \"" + message + "\" to " + topic);
+        } catch (MqttException e) {
+            e.printStackTrace();
+            System.out.println("Failed to publish to " + topic);
+        }
     }
 
 }

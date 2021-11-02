@@ -1,5 +1,4 @@
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 public class MqttCallback extends Server implements org.eclipse.paho.client.mqttv3.MqttCallback {
@@ -15,12 +14,6 @@ public class MqttCallback extends Server implements org.eclipse.paho.client.mqtt
     }
 
     @Override
-    public void deliveryComplete(IMqttDeliveryToken token) {
-        try {
-            System.out.println("Message " + token.getMessage().toString() + " was delivered!");
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
+    public void deliveryComplete(IMqttDeliveryToken token) {}
 
 }
