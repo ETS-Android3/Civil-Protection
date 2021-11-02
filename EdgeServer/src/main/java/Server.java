@@ -21,8 +21,8 @@ public class Server {
         File outputDir = new File(outputPath);
 
         // Topics to listen to
-        String clientPrefix = "civil/clients/";
-        String sensorTopics = "civil/sensors/";
+        String clientTPrefix = "civil/clients/";
+        String sensorTPrefix = "civil/sensors/";
         // Topics to write to
         String sToClientsPrefix = "civil/server/";
         /* *** Not to be used *** */
@@ -40,7 +40,7 @@ public class Server {
                     if (!entry.delete()) throw new IOException("Failed to delete file " + entry.getName());
         }
 
-        // Produce output files
+        // Convert xml files to csv
         Parser parser = new Parser();
         parser.parseXmlToCsv(inputPath + "/android_1.xml");
         parser.parseXmlToCsv(inputPath + "/android_2.xml");
@@ -65,10 +65,10 @@ public class Server {
         }
 
         // Subscribe to all client topics
-        subscribe(connection, clientPrefix + "#");
+        subscribe(connection, clientTPrefix + "#");
 
         // Subscribe to all sensor topics
-        subscribe(connection, sensorTopics + "#");
+        subscribe(connection, sensorTPrefix + "#");
 
         // Example publish
         publish(connection, sToClientsPrefix + "test", "hello world!");
