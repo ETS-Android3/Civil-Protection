@@ -31,7 +31,6 @@ public class DatabaseHelper {
         st.close();
         myConn.close();
         System.out.println("Disconnected from database!");
-
     }
 
 }
