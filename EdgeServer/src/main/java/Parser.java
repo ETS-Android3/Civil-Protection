@@ -15,7 +15,7 @@ import java.nio.file.Files;
 // Simple XML to CSV parser
 public class Parser {
 
-    private String initFile(String filePath) {
+    private static String initFile(String filePath) {
         String fileType = null;
         final File file = new File(filePath);
         try {
@@ -35,7 +35,7 @@ public class Parser {
     }
 
     // Converts $inFile from XML to CSV format
-    public void parseXmlToCsv(String inFile) throws ParserConfigurationException {
+    public static void parseXmlToCsv(String inFile) throws ParserConfigurationException {
 
         String outFile = initFile(inFile);
 
