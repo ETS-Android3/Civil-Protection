@@ -1,7 +1,4 @@
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -41,28 +38,20 @@ public class Server {
         }
 
         // Convert xml files to csv
-        Parser parser = new Parser();
-        parser.parseXmlToCsv(inputPath + "/android_1.xml");
-        parser.parseXmlToCsv(inputPath + "/android_2.xml");
+        Parser.parseXmlToCsv(inputPath + "/android_1.xml");
+        Parser.parseXmlToCsv(inputPath + "/android_2.xml");
 
         // Database demo
         DatabaseHelper db = new DatabaseHelper();
         db.connect();
 
-        // MQTT broker connection demo
-        MqttAsyncClient connection = new MqttAsyncClient("tcp://localhost:1883", String.valueOf(new Random().nextInt(10000)), new MemoryPersistence());
-        connection.setCallback(new MqttCallback());
-
-        // Connect to broker
-        try {
-            IMqttToken token = connection.connect();
-            token.waitForCompletion();
-            System.out.println("Successfully connected to broker!");
-        } catch (MqttException e) {
-            System.out.println("Failed to connect to broker!");
+        // Create Mqtt client and connect to broker
+        MqttAsyncClient connection = connect("tcp://localhost:1883", String.valueOf(new Random().nextInt(10000)), new MemoryPersistence());
+        if (connection == null) {
             db.disconnect();
             System.exit(-1);
         }
+        connection.setCallback(new MqttCallback());
 
         // Subscribe to all client topics
         subscribe(connection, clientTPrefix + "#");
@@ -85,6 +74,23 @@ public class Server {
 
     public void onMessageArrived(String topic, MqttMessage message) {
         System.out.println("Received: \"" + message + "\" in topic " + topic);
+    }
+
+    private static MqttAsyncClient connect(String uri, String sessionID, MemoryPersistence persistence) {
+        MqttAsyncClient client = null;
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setServerURIs(new String[]{uri});
+        options.setAutomaticReconnect(true);
+        try {
+            client = new MqttAsyncClient(uri, sessionID, persistence);
+            IMqttToken token = client.connect();
+            token.waitForCompletion();
+            System.out.println("Successfully connected to broker!");
+        } catch (MqttException e) {
+            e.printStackTrace();
+            System.out.println("Failed to connect to broker!");
+        }
+        return client;
     }
 
     private static void subscribe(MqttAsyncClient connection, String topic) {
