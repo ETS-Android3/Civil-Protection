@@ -1,3 +1,5 @@
+package com.uoa.backend;
+
 public class ClientRecord {
 
     private String timestep;

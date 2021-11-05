@@ -1,11 +1,13 @@
+package com.uoa.backend;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-public class MqttCallback extends Server implements org.eclipse.paho.client.mqttv3.MqttCallback {
+public class MqttCallback extends BackEndApplication implements org.eclipse.paho.client.mqttv3.MqttCallback {
 
     @Override
     public void connectionLost(Throwable cause) {
-        System.out.println("Connection was lost!");
+
     }
 
     @Override
@@ -14,6 +16,7 @@ public class MqttCallback extends Server implements org.eclipse.paho.client.mqtt
     }
 
     @Override
-    public void deliveryComplete(IMqttDeliveryToken token) {}
+    public void deliveryComplete(IMqttDeliveryToken token) {
 
+    }
 }
