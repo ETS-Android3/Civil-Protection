@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:padding="25dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <LinearLayout
+            android:id="@+id/subscribeTopicGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/subscribeTopicTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="35dip"
+                android:layout_marginRight="35dp"
+                android:text="@string/topicTextView"
+                android:textStyle="bold"
+                android:typeface="serif" />
+
+            <EditText
+                android:id="@+id/subscribeTopicEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/holo_blue_dark"
+                android:ems="10"
+                android:hint="@string/topicPlaceholder"
+                android:inputType="text"
+                android:textCursorDrawable="@drawable/cursor_color"
+                android:typeface="serif">
+
+                <requestFocus />
+
+            </EditText>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/subscribeQosGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/subscribeTopicGroup"
+            android:layout_marginTop="25dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/subscribeQosTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/qos"
+                android:textStyle="bold"
+                android:typeface="serif" />
+
+            <RadioGroup
+                android:id="@+id/subscribeQosRadio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/qos0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@android:color/holo_blue_dark"
+                    android:text="@string/qos0"
+                    android:typeface="serif" />
+
+                <RadioButton
+                    android:id="@+id/qos1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@android:color/holo_blue_dark"
+                    android:text="@string/qos1"
+                    android:typeface="serif" />
+
+                <RadioButton
+                    android:id="@+id/qos2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@android:color/holo_blue_dark"
+                    android:checked="true"
+                    android:text="@string/qos2"
+                    android:typeface="serif" />
+
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/subscribeButton"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/subscribeQosGroup"
+            android:layout_marginTop="25dp"
+            android:background="@drawable/round"
+            android:text="@string/subscribeButton"
+            android:textColor="#f0fff0"
+            android:textStyle="bold"
+            android:typeface="serif" />
+
+    </RelativeLayout>
+
+</ScrollView>

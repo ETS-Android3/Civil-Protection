@@ -1,0 +1,70 @@
+<resources>
+
+    <string name="app_name">Civil Protection</string>
+    <string name="tab_1_title">Publish</string>
+    <string name="tab_2_title">Subscribe</string>
+    <string name="tab_3_title">Data</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_file_picker">Select a file</string>
+
+    <!-- Preference Titles -->
+    <string name="simulation_header">Simulation</string>
+    <string name="last_will_header">Last Will Message</string>
+    <string name="authentication_header">Authentication &amp; Security</string>
+    <string name="dark_theme_header">Dark Theme</string>
+
+    <!-- Root Preferences -->
+    <string name="session_id">Session ID</string>
+    <string name="edit_text_server_ip">Server IP Address</string>
+    <string name="defaultServerIp">192.168.1.22</string>
+    <string name="edit_text_server_port">Server Port</string>
+    <string name="defaultServerPort">1883</string>
+    <string name="qos_level">QoS level</string>
+    <string name="time_out_time">Time-out</string>
+    <string name="keep_alive_time">Keep-alive</string>
+
+    <!-- Last Will Preferences -->
+    <string name="last_will_topic">Topic</string>
+    <string name="last_will_payload">Payload</string>
+    <string name="last_will_retain">Retain</string>
+    <string name="last_will_qos_level">QoS level</string>
+
+    <!-- Security Preferences -->
+    <string name="credentials">Use credentials</string>
+    <string name="edit_text_username">Username</string>
+    <string name="edit_text_password">Password</string>
+    <string name="ssl">Use SSL</string>
+
+    <!-- Appearance Preferences -->
+    <string name="dark_theme_on">Enabled</string>
+    <string name="dark_theme_off">Disabled</string>
+
+    <!-- Main activities -->
+    <string name="publishButton">Publish</string>
+    <string name="subscribeButton">Subscribe</string>
+    <string name="startSimulationButton">Start</string>
+    <string name="stopSimulationButton">Stop</string>
+
+    <string name="topicTextView">Topic</string>
+    <string name="topicPlaceholder">test/topic</string>
+
+    <string name="messageTextView">Message</string>
+    <string name="messagePlaceholder">Hello World!</string>
+
+    <string name="qos">QoS</string>
+    <string name="qos0">At most 1</string>
+    <string name="qos1">At least 1</string>
+    <string name="qos2">Exactly 1</string>
+
+    <string name="retainedTextView">Retain</string>
+
+    <string name="simulationTimeOut">Simulation Time</string>
+    <string name="simulationDefaultTimeOut">10</string>
+    <string name="simulationFileTextView">Simulation file:</string>
+    <string name="simulationFileButton">Select file</string>
+    <string name="simulationPathTextView">Not selected</string>
+
+    <!-- Others -->
+    <string name="empty" />
+
+</resources>
