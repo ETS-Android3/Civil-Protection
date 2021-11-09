@@ -10,10 +10,10 @@ public class MqttConnection {
     private static final String sessionID = "Civil-Protection-Edge-Server";
     // Topics to listen to
     private static final String clientTPrefix = "civil/clients/";
-    String sensorTPrefix = "civil/sensors/";
+    private static final String sensorTPrefix = "civil/sensors/";
     // Topics to write to
     private static final String sToClientsPrefix = "civil/server/";
-    /* *** Not to be used *** */
+    /**** Not to be used ****/
     private final String sToSensorsPrefix = "civil/server-sensors/";
 
     public MqttConnection() {
