@@ -515,6 +515,8 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                 } else {
                     // Save current data to pass to main thread, or they might be updated before being consumed
                     String currentLine = lines.get(lineNumber);
+                    // Reset the publishing topic
+                    connection.setPubTopic("");
                     // Assign job to Main thread
                     handler.post(() -> publish(connection.getPubTopic() + "simulation", currentLine, connection.getQos(), connection.isRetain()));
                     lineNumber++;
