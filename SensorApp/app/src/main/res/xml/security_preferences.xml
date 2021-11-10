@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="Authentication">
+
+        <SwitchPreferenceCompat
+            android:key="use_auth"
+            android:title="@string/credentials"
+            app:defaultValue="false"
+            app:icon="@drawable/ic_use_credentials" />
+
+        <EditTextPreference
+            app:defaultValue=""
+            app:dependency="use_auth"
+            app:icon="@drawable/ic_user"
+            app:key="username"
+            app:title="@string/edit_text_username"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:defaultValue=""
+            app:dependency="use_auth"
+            app:icon="@drawable/ic_key"
+            app:key="password"
+            app:title="@string/edit_text_password"
+            app:useSimpleSummaryProvider="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Protocol">
+
+        <SwitchPreferenceCompat
+            android:key="ssl"
+            android:title="@string/ssl"
+            app:defaultValue="false"
+            app:icon="@drawable/ic_security" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

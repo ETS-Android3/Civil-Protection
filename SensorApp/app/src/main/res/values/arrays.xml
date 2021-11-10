@@ -1,0 +1,35 @@
+<resources>
+
+    <string-array name="qos_entries">
+        <item>At most once</item>
+        <item>At least once</item>
+        <item>Exactly once</item>
+    </string-array>
+
+    <string-array name="qos_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <array name="initial_smoke_values">
+        <item>0.0</item>
+        <item>0.25</item>
+    </array>
+
+    <array name="initial_gas_values">
+        <item>0.0</item>
+        <item>11.0</item>
+    </array>
+
+    <array name="initial_temp_values">
+        <item>-5</item>
+        <item>80</item>
+    </array>
+
+    <array name="initial_uv_values">
+        <item>0.0</item>
+        <item>11.0</item>
+    </array>
+
+</resources>

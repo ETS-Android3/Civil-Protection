@@ -1,0 +1,88 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="Connectivity">
+
+        <EditTextPreference
+            android:dialogMessage="Only numeric IDs are allowed"
+            android:persistent="true"
+            app:defaultValue="-1"
+            app:icon="@drawable/ic_identity"
+            app:key="session_id"
+            app:title="@string/session_id"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            android:dialogMessage="Example: test.mosquitto.org"
+            android:key="server_ip"
+            android:persistent="true"
+            android:title="@string/edit_text_server_ip"
+            app:defaultValue="@string/defaultServerIp"
+            app:icon="@drawable/ic_connect_link"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            android:dialogMessage="Suggested: 1883"
+            android:key="server_port"
+            android:persistent="true"
+            android:title="@string/edit_text_server_port"
+            app:defaultValue="@string/defaultServerPort"
+            app:icon="@drawable/ic_port"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="2"
+            app:entries="@array/qos_entries"
+            app:entryValues="@array/qos_values"
+            app:icon="@drawable/ic_qos_levels"
+            app:key="qos"
+            app:title="@string/qos_level"
+            app:useSimpleSummaryProvider="true" />
+
+        <SeekBarPreference
+            android:max="100"
+            android:persistent="true"
+            android:summary="Inactivity seconds"
+            app:defaultValue="30"
+            app:icon="@drawable/ic_time_out"
+            app:key="time_out_time"
+            app:min="1"
+            app:showSeekBarValue="true"
+            app:title="@string/time_out_time" />
+
+        <SeekBarPreference
+            android:max="300"
+            android:persistent="true"
+            android:summary="Seconds to hold"
+            app:defaultValue="60"
+            app:icon="@drawable/ic_keep_alive_time"
+            app:key="keep_alive_time"
+            app:showSeekBarValue="true"
+            app:title="@string/keep_alive_time" />
+
+        <Preference
+            app:fragment="com.civilprotectionsensor.SettingsActivity$LastWillSettings"
+            app:icon="@drawable/ic_message"
+            app:key="last_will_header"
+            app:title="@string/last_will_header" />
+
+        <Preference
+            app:fragment="com.civilprotectionsensor.SettingsActivity$SecuritySettings"
+            app:icon="@drawable/ic_security"
+            app:key="simulation_settings_header"
+            app:title="@string/authentication_header" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Appearance">
+
+        <SwitchPreferenceCompat
+            app:icon="@drawable/ic_dark_mode"
+            app:key="dark_theme"
+            app:summaryOff="@string/dark_theme_off"
+            app:summaryOn="@string/dark_theme_on"
+            app:title="@string/dark_theme_header" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
