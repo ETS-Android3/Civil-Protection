@@ -98,7 +98,7 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
                 // Add desired handling
                 break;
             case "server_port":
-                if (isNumeric(readStringSetting(key))) {
+                if (!isNumeric(readStringSetting(key))) {
                     setStringSetting(key, String.valueOf(1883));
                     finish();
                     startActivity(new Intent(this, com.civilprotection.SettingsActivity.class));
