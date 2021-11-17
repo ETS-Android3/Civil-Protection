@@ -43,10 +43,6 @@
             android:name=".SensorCreateActivity"
             android:label="@string/title_activity_sensor_create"
             android:parentActivityName=".MainActivity" />
-        <activity
-            android:name="com.nbsp.materialfilepicker.ui.FilePickerActivity"
-            android:label="@string/title_file_picker"
-            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>
