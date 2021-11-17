@@ -19,8 +19,7 @@ public class Utils {
     public static List<Sensor> getJsonContent(Context context, String file) {
         FileInputStream fis = null;
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        Type sensorListType = new TypeToken<List<Sensor>>() {
-        }.getType();
+        Type sensorListType = new TypeToken<List<Sensor>>() {}.getType();
         String result = "";
 
         try {
