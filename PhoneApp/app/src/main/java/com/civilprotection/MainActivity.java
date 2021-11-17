@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     private void createTabs() {
         viewPager = findViewById(R.id.view_pager);
         TabLayout tabs = findViewById(R.id.tabs);
-        SectionsPagerAdapter adapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
+        SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new FragmentPublish(), getResources().getString(R.string.tab_1_title));
         adapter.addFragment(new FragmentSubscribe(), getResources().getString(R.string.tab_2_title));
         adapter.addFragment(new FragmentData(), getResources().getString(R.string.tab_3_title));
@@ -232,11 +232,11 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         if (connection.isConnected()) {
             turnOnFAB();
             try {
-                connection.publish(topic, message).waitForCompletion();
-                System.out.println("Successfully published \"" + payload + "\" to " + topic);
+                connection.publish(connection.getPubTopic(), message).waitForCompletion();
+                System.out.println("Successfully published \"" + payload + "\" to " + connection.getPubTopic());
                 Toast.makeText(this, "Published \"" + payload + "\" to " + topic, Toast.LENGTH_SHORT).show();
             } catch (MqttException e) {
-                System.err.println("Failed to publish \"" + payload + "\" to " + topic);
+                System.err.println("Failed to publish \"" + payload + "\" to " + connection.getPubTopic());
                 e.printStackTrace();
             }
         } else {
@@ -249,11 +249,12 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         if (connection.isConnected()) {
             turnOnFAB();
             try {
-                connection.subscribe(topic, qos);
-                System.out.println("Successfully subscribed to " + topic);
+                connection.setSubTopic("#");
+                connection.subscribe(connection.getSubTopic(), qos);
+                System.out.println("Successfully subscribed to " + connection.getSubTopic());
                 Toast.makeText(this, "Subscribed to " + topic, Toast.LENGTH_SHORT).show();
             } catch (MqttException e) {
-                System.err.println("Failed to subscribe to " + topic);
+                System.err.println("Failed to subscribe to " + connection.getSubTopic());
                 e.printStackTrace();
             }
         } else {
@@ -297,8 +298,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
             Toast.makeText(this, "You need to specify the topic!", Toast.LENGTH_SHORT).show();
         else if (connection.getMessage().isEmpty())
             Toast.makeText(this, "Fill out a message first!", Toast.LENGTH_SHORT).show();
-        else
-            publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain());
+        else publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain());
     }
 
     @Override
@@ -326,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                     connection.setMaxSimulationTime(0);
                 }
                 Toast.makeText(this, "Starting simulation", Toast.LENGTH_SHORT).show();
-                SimulationRunnable runnable = new SimulationRunnable(simulationFilePath, connection.getMaxSimulationTime(), connection.getQos(), connection.isRetain());
+                SimulationRunnable runnable = new SimulationRunnable(simulationFilePath, connection.getMaxSimulationTime());
                 stopSimulation = false;
                 new Thread(runnable).start();
             }
@@ -341,13 +341,13 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         Toast.makeText(this, "Stopping simulation", Toast.LENGTH_SHORT).show();
     }
 
-    public void onConnectSuccess() {
+    private void onConnectSuccess() {
         turnOnFAB();
         System.out.println("Successfully connected to " + connection.getServerUri());
         Toast.makeText(this, "Connected to " + connection.getServerIp(), Toast.LENGTH_SHORT).show();
     }
 
-    public void onConnectFailure() {
+    private void onConnectFailure() {
         turnOffFAB();
         System.err.println("Failed to connect to " + connection.getServerUri());
         if (connection.isInternetServiceAvailable())
@@ -356,24 +356,24 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
             Toast.makeText(this, "Failed to connect. Please check your internet connection and retry!", Toast.LENGTH_SHORT).show();
     }
 
-    public void onDisconnectSuccess() {
+    private void onDisconnectSuccess() {
         turnOffFAB();
         System.out.println("Successfully disconnected from " + connection.getServerUri());
         Toast.makeText(this, "Disconnected from " + connection.getServerIp(), Toast.LENGTH_SHORT).show();
     }
 
-    public void onDisconnectFailure() {
+    private void onDisconnectFailure() {
         turnOnFAB();
         System.out.println("Failed to disconnect from " + connection.getServerUri());
         Toast.makeText(this, "Failed to disconnect from " + connection.getServerIp(), Toast.LENGTH_SHORT).show();
     }
 
-    public void handleMessageArrived(String topic, MqttMessage message) {
+    private void handleMessageArrived(String topic, MqttMessage message) {
         System.out.println("Received " + message + " in " + topic);
         Toast.makeText(connection.getContext(), "Received " + message + " in " + topic, Toast.LENGTH_SHORT).show();
     }
 
-    public void handleConnectionLost() {
+    private void handleConnectionLost() {
         turnOffFAB();
         System.out.println("Connection was lost!");
         Toast.makeText(this, "Connection was lost!", Toast.LENGTH_SHORT).show();
@@ -449,16 +449,16 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
 
     private void showFilePickerDialog() {
         new MaterialFilePicker()
-                .withActivity(this)
-                .withCloseMenu(true)
-                .withPath(Environment.getExternalStorageDirectory().getAbsolutePath())
-                .withRootPath(Environment.getExternalStorageDirectory().getAbsolutePath())
-                .withHiddenFiles(false)
-                .withFilter(Pattern.compile(".*\\.(csv)$"))
-                .withFilterDirectories(false)
-                .withTitle("Select a file")
-                .withRequestCode(FILE_PICKER_REQUEST_CODE)
-                .start();
+            .withActivity(this)
+            .withCloseMenu(true)
+            .withPath(Environment.getExternalStorageDirectory().getAbsolutePath())
+            .withRootPath(Environment.getExternalStorageDirectory().getAbsolutePath())
+            .withHiddenFiles(false)
+            .withFilter(Pattern.compile(".*\\.(csv)$"))
+            .withFilterDirectories(false)
+            .withTitle("Select a file")
+            .withRequestCode(FILE_PICKER_REQUEST_CODE)
+            .start();
     }
 
     private void showExitDialog() {
@@ -482,16 +482,12 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         int lineNumber;
         String line;
         int timeout;
-        int qos;
-        boolean retain;
 
-        SimulationRunnable(String file, int timeout, int qos, boolean retain) {
+        SimulationRunnable(String file, int timeout) {
             this.file = file;
             this.lineNumber = 0;
             this.line = "";
             this.timeout = timeout;
-            this.qos = qos;
-            this.retain = retain;
         }
 
         @Override
@@ -516,9 +512,9 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                     // Save current data to pass to main thread, or they might be updated before being consumed
                     String currentLine = lines.get(lineNumber);
                     // Reset the publishing topic
-                    connection.setPubTopic("");
+                    connection.setPubTopic("simulation");
                     // Assign job to Main thread
-                    handler.post(() -> publish(connection.getPubTopic() + "simulation", currentLine, connection.getQos(), connection.isRetain()));
+                    handler.post(() -> publish(connection.getPubTopic(), currentLine, connection.getQos(), connection.isRetain()));
                     lineNumber++;
                 }
             }, 0, 1, TimeUnit.SECONDS);
