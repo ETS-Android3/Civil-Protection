@@ -65,6 +65,12 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
             case "last_will_retain":
                 // Add desired handling
                 break;
+            case "auto_coords":
+                // Add desired handling
+                break;
+            case "location":
+                // Add desired handling
+                break;
             case "ssl":
                 // Add desired handling
                 break;
@@ -98,7 +104,7 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
                 // Add desired handling
                 break;
             case "server_port":
-                if (isNumeric(readStringSetting(key))) {
+                if (!isNumeric(readStringSetting(key))) {
                     setStringSetting(key, String.valueOf(1883));
                     finish();
                     startActivity(new Intent(this, com.civilprotectionsensor.SettingsActivity.class));
