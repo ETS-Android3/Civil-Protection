@@ -3,30 +3,42 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/createSmokeSensor">
+    app:startDestination="@+id/createSmokeSensorFragment">
 
     <fragment
-        android:id="@+id/createSmokeSensor"
+        android:id="@+id/createSmokeSensorFragment"
         android:name="com.civilprotectionsensor.ui.fragments.FragmentCreateSmokeSensor"
-        android:label="@string/title_smoke_create"
-        tools:layout="@layout/fragment_create_smoke_sensor" />
+        android:label="@string/tab_smoke_title"
+        tools:layout="@layout/fragment_create_smoke_sensor">
+        <action
+            android:id="@+id/action_createSmokeSensorFragment_to_createGasSensorFragment"
+            app:destination="@id/createGasSensorFragment" />
+    </fragment>
 
     <fragment
-        android:id="@+id/navigationGasSensor"
+        android:id="@+id/createGasSensorFragment"
         android:name="com.civilprotectionsensor.ui.fragments.FragmentCreateGasSensor"
-        android:label="@string/title_gas_create"
-        tools:layout="@layout/fragment_create_gas_sensor" />
+        android:label="@string/tab_gas_title"
+        tools:layout="@layout/fragment_create_gas_sensor">
+        <action
+            android:id="@+id/action_createGasSensorFragment_to_createTempSensorFragment"
+            app:destination="@id/createTempSensorFragment" />
+    </fragment>
 
     <fragment
-        android:id="@+id/navigationTempSensor"
+        android:id="@+id/createTempSensorFragment"
         android:name="com.civilprotectionsensor.ui.fragments.FragmentCreateTempSensor"
-        android:label="@string/title_temp_create"
-        tools:layout="@layout/fragment_create_temp_sensor" />
+        android:label="@string/tab_temp_title"
+        tools:layout="@layout/fragment_create_temp_sensor">
+        <action
+            android:id="@+id/action_createTempSensorFragment_to_createUvSensorFragment"
+            app:destination="@id/createUvSensorFragment" />
+    </fragment>
 
     <fragment
-        android:id="@+id/navigationUvSensor"
+        android:id="@+id/createUvSensorFragment"
         android:name="com.civilprotectionsensor.ui.fragments.FragmentCreateUvSensor"
-        android:label="@string/title_uv_create"
+        android:label="@string/tab_uv_title"
         tools:layout="@layout/fragment_create_temp_sensor" />
 
 </navigation>
