@@ -74,6 +74,29 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="Location">
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            app:icon="@drawable/ic_location"
+            app:key="auto_coords"
+            app:disableDependentsState="true"
+            app:summaryOff="@string/auto_coords_off"
+            app:summaryOn="@string/auto_coords_on"
+            app:title="@string/auto_coords_header" />
+
+        <ListPreference
+            android:dependency="auto_coords"
+            app:defaultValue="0"
+            app:entries="@array/location_entries"
+            app:entryValues="@array/location_values"
+            app:icon="@drawable/ic_coordinates"
+            app:key="location"
+            app:title="@string/chosenLocation"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
     <PreferenceCategory app:title="Appearance">
 
         <SwitchPreferenceCompat
