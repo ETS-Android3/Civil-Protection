@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:padding="25dp"
-    tools:context=".ui.fragments.FragmentGasSensor">
+    tools:context=".ui.fragments.FragmentUvSensor">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -26,16 +26,16 @@
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/createGasSensor"
+                    android:id="@+id/createUvSensor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="10dp"
-                    android:text="@string/gasSensorTextView"
+                    android:text="@string/uvSensorTextView"
                     android:textAlignment="center"
                     android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/gasSensorActiveTextView"
+                    android:id="@+id/uvSensorActiveTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -44,7 +44,7 @@
                     android:typeface="serif" />
 
                 <CheckBox
-                    android:id="@+id/gasSensorActiveCheckBox"
+                    android:id="@+id/uvSensorActiveCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:buttonTint="@android:color/holo_blue_dark"
@@ -54,12 +54,12 @@
             </LinearLayout>
 
             <com.google.android.material.slider.Slider
-                android:id="@+id/gasSensorSlider"
+                android:id="@+id/uvSensorSlider"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:valueFrom="0f"
                 android:valueTo="11f"
-                app:values="@array/initial_gas_values" />
+                app:values="@array/initial_uv_values" />
 
         </LinearLayout>
 

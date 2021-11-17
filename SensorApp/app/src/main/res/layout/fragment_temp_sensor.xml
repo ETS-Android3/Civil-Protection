@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:padding="25dp">
+    android:padding="25dp"
+    tools:context=".ui.fragments.FragmentTempSensor">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -13,186 +16,50 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_margin="25dp">
-
-                <TextView
-                    android:id="@+id/simulationFileTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/simulationFileTextView"
-                    android:textStyle="bold"
-                    android:typeface="serif" />
-
-                <TextView
-                    android:id="@+id/simulationPathTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:backgroundTint="@android:color/holo_blue_dark"
-                    android:text="@string/simulationPathTextView"
-                    android:typeface="serif" />
-
-            </LinearLayout>
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/simulationFileButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="25dp"
-                android:layout_marginEnd="25dp"
-                android:layout_marginBottom="0dp"
-                android:background="@drawable/round"
-                android:text="@string/simulationFileButton"
-                android:textColor="#f0fff0"
-                android:textStyle="bold"
-                android:typeface="serif" />
-
-            <LinearLayout
-                android:id="@+id/qos"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:gravity="center"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:id="@+id/simulationQosTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="@string/qos"
-                    android:textStyle="bold"
-                    android:typeface="serif" />
-
-                <RadioGroup
-                    android:id="@+id/simulationQosRadio"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/qos0"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:buttonTint="@android:color/holo_blue_dark"
-                        android:text="@string/qos0"
-                        android:typeface="serif" />
-
-                    <RadioButton
-                        android:id="@+id/qos1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:buttonTint="@android:color/holo_blue_dark"
-                        android:text="@string/qos1"
-                        android:typeface="serif" />
-
-                    <RadioButton
-                        android:id="@+id/qos2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:buttonTint="@android:color/holo_blue_dark"
-                        android:checked="true"
-                        android:text="@string/qos2"
-                        android:typeface="serif" />
-
-                </RadioGroup>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="5dp"
-                android:gravity="center">
-
-                <TextView
-                    android:id="@+id/simulationTimeOutTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/simulationTimeOut"
-                    android:textStyle="bold"
-                    android:typeface="serif" />
-
-                <EditText
-                    android:id="@+id/simulationTimeOutEditText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:backgroundTint="@android:color/holo_blue_dark"
-                    android:inputType="number"
-                    android:text="@string/simulationDefaultTimeOut"
-                    android:textCursorDrawable="@drawable/cursor_color"
-                    android:typeface="serif" />
-
-                <TextView
+                    android:id="@+id/createTempSensor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1" />
+                    android:layout_marginEnd="10dp"
+                    android:text="@string/tempSensorTextView"
+                    android:textAlignment="center"
+                    android:textSize="20sp" />
 
                 <TextView
-                    android:id="@+id/simulationRetainedTextView"
+                    android:id="@+id/tempSensorActiveTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/retainedTextView"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/sensorActive"
                     android:textStyle="bold"
                     android:typeface="serif" />
 
                 <CheckBox
-                    android:id="@+id/simulationRetainedCheckBox"
+                    android:id="@+id/tempSensorActiveCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:buttonTint="@android:color/holo_blue_dark"
-                    android:text="@string/empty" />
+                    android:text="@string/empty"
+                    android:textSize="20sp" />
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <com.google.android.material.slider.Slider
+                android:id="@+id/tempSensorSlider"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="1">
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/simulationStartButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="25dp"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="0dp"
-                    android:layout_weight="0.5"
-                    android:background="@drawable/round"
-                    android:text="@string/startSimulationButton"
-                    android:textColor="#f0fff0"
-                    android:textStyle="bold"
-                    android:typeface="serif" />
-
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/simulationStopButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="30dp"
-                    android:layout_marginEnd="25dp"
-                    android:layout_marginBottom="0dp"
-                    android:layout_weight="0.5"
-                    android:background="@drawable/round"
-                    android:text="@string/stopSimulationButton"
-                    android:textColor="#f0fff0"
-                    android:textStyle="bold"
-                    android:typeface="serif" />
-
-            </LinearLayout>
+                android:valueFrom="-5f"
+                android:valueTo="80f"
+                app:values="@array/initial_temp_values" />
 
         </LinearLayout>
 

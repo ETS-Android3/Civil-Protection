@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:padding="25dp"
-    tools:context=".ui.fragments.FragmentCreateUvSensor">
+    tools:context=".ui.fragments.FragmentSmokeSensor">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -19,14 +19,6 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <com.google.android.material.slider.Slider
-                android:id="@+id/UvSensorSlider"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:valueFrom="0f"
-                android:valueTo="11f"
-                app:values="@array/initial_uv_values" />
-
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -34,9 +26,19 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/createSmokeSensor"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:text="@string/smokeSensorTextView"
+                    android:textAlignment="center"
+                    android:textSize="20sp" />
+
+                <TextView
                     android:id="@+id/smokeSensorActiveTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
                     android:text="@string/sensorActive"
                     android:textStyle="bold"
                     android:typeface="serif" />
@@ -46,9 +48,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:buttonTint="@android:color/holo_blue_dark"
-                    android:text="@string/empty" />
+                    android:text="@string/empty"
+                    android:textSize="20sp" />
 
             </LinearLayout>
+
+            <com.google.android.material.slider.Slider
+                android:id="@+id/smokeSensorSlider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:valueFrom="0f"
+                android:valueTo="0.25f"
+                app:values="@array/initial_smoke_values" />
 
         </LinearLayout>
 
