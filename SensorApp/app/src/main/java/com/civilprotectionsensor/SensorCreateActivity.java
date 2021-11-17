@@ -68,11 +68,11 @@ public class SensorCreateActivity extends AppCompatActivity
     private void createTabs() {
         ViewPager viewPager = findViewById(R.id.createSensorViewPager);
         TabLayout tabs = findViewById(R.id.createSensorTabs);
-        SectionsPagerAdapter adapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
-        adapter.addFragment(new FragmentCreateSmokeSensor(), getResources().getString(R.string.title_smoke_create));
-        adapter.addFragment(new FragmentCreateGasSensor(), getResources().getString(R.string.title_gas_create));
-        adapter.addFragment(new FragmentCreateTempSensor(), getResources().getString(R.string.title_temp_create));
-        adapter.addFragment(new FragmentCreateUvSensor(), getResources().getString(R.string.title_uv_create));
+        SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        adapter.addFragment(new FragmentCreateSmokeSensor(), getResources().getString(R.string.tab_smoke_title));
+        adapter.addFragment(new FragmentCreateGasSensor(), getResources().getString(R.string.tab_gas_title));
+        adapter.addFragment(new FragmentCreateTempSensor(), getResources().getString(R.string.tab_temp_title));
+        adapter.addFragment(new FragmentCreateUvSensor(), getResources().getString(R.string.tab_uv_title));
         viewPager.setAdapter(adapter);
         tabs.setupWithViewPager(viewPager);
         viewModel = new ViewModelProvider(this).get(CreateSensorViewModel.class);
