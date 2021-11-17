@@ -1,16 +1,21 @@
 <resources>
 
+    <!-- Activities -->
     <string name="app_name">Civil Protection Sensor</string>
-    <string name="tab_1_title">Publish</string>
-    <string name="tab_2_title">Subscribe</string>
-    <string name="tab_3_title">Data</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="title_file_picker">Select a file</string>
+    <string name="title_activity_sensor_create">Create Sensors</string>
+
+    <!-- Tabs -->
+    <string name="tab_smoke_title">Smoke</string>
+    <string name="tab_gas_title">Gas</string>
+    <string name="tab_temp_title">Temp</string>
+    <string name="tab_uv_title">UV</string>
 
     <!-- Preference Titles -->
     <string name="simulation_header">Simulation</string>
     <string name="last_will_header">Last Will Message</string>
     <string name="authentication_header">Authentication &amp; Security</string>
+    <string name="auto_coords_header">Auto Coordinates</string>
     <string name="dark_theme_header">Dark Theme</string>
 
     <!-- Root Preferences -->
@@ -35,41 +40,29 @@
     <string name="edit_text_password">Password</string>
     <string name="ssl">Use SSL</string>
 
+    <!-- Location Preferences -->
+    <string name="auto_coords_on">Enabled</string>
+    <string name="auto_coords_off">Disabled</string>
+    <string name="chosenLocation">Device location</string>
+
     <!-- Appearance Preferences -->
     <string name="dark_theme_on">Enabled</string>
     <string name="dark_theme_off">Disabled</string>
 
     <!-- Main activities -->
-    <string name="publishButton">Publish</string>
-    <string name="subscribeButton">Subscribe</string>
-    <string name="startSimulationButton">Start</string>
-    <string name="stopSimulationButton">Stop</string>
-
-    <string name="topicTextView">Topic</string>
-    <string name="topicPlaceholder">test/topic</string>
-
-    <string name="messageTextView">Message</string>
-    <string name="messagePlaceholder">Hello World!</string>
-
     <string name="qos">QoS</string>
     <string name="qos0">At most 1</string>
     <string name="qos1">At least 1</string>
     <string name="qos2">Exactly 1</string>
 
-    <string name="retainedTextView">Retain</string>
-
-    <string name="simulationTimeOut">Simulation Time</string>
-    <string name="simulationDefaultTimeOut">10</string>
-    <string name="simulationFileTextView">Simulation file:</string>
-    <string name="simulationFileButton">Select file</string>
-    <string name="simulationPathTextView">Not selected</string>
+    <!-- Main Fragments -->
+    <string name="sensorActive">Active</string>
+    <string name="smokeSensorTextView">Smoke Sensor</string>
+    <string name="gasSensorTextView">Gas Sensor</string>
+    <string name="tempSensorTextView">Temperature Sensor</string>
+    <string name="uvSensorTextView">UV Sensor</string>
 
     <!-- Create Sensors -->
-    <string name="title_activity_sensor_create">Create Sensors</string>
-    <string name="title_smoke_create">Smoke</string>
-    <string name="title_gas_create">Gas</string>
-    <string name="title_temp_create">Temp</string>
-    <string name="title_uv_create">UV</string>
     <string name="createSensorButton">Create</string>
 
     <!-- Others -->
