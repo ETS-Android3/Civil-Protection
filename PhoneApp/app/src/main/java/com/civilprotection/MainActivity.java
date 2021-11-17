@@ -513,8 +513,9 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                     String currentLine = lines.get(lineNumber);
                     // Reset the publishing topic
                     connection.setPubTopic("simulation");
+                    connection.setMessage(currentLine);
                     // Assign job to Main thread
-                    handler.post(() -> publish(connection.getPubTopic(), currentLine, connection.getQos(), connection.isRetain()));
+                    handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
                     lineNumber++;
                 }
             }, 0, 1, TimeUnit.SECONDS);
