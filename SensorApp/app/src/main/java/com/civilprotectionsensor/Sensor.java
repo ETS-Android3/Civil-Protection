@@ -5,13 +5,13 @@ import androidx.annotation.NonNull;
 public class Sensor {
 
     private String type;
-    private double min;
-    private double max;
-    private double current;
+    private Float min;
+    private Float max;
+    private Float current;
 
     public Sensor() {}
 
-    public Sensor(String type, double min, double max, double current) {
+    public Sensor(String type, Float min, Float max, Float current) {
         this.type = type;
         this.min = min;
         this.max = max;
@@ -32,27 +32,27 @@ public class Sensor {
         this.type = type;
     }
 
-    public double getMin() {
+    public Float getMin() {
         return min;
     }
 
-    public void setMin(double min) {
+    public void setMin(Float min) {
         this.min = min;
     }
 
-    public double getMax() {
+    public Float getMax() {
         return max;
     }
 
-    public void setMax(double max) {
+    public void setMax(Float max) {
         this.max = max;
     }
 
-    public double getCurrent() {
+    public Float getCurrent() {
         return current;
     }
 
-    public void setCurrent(double current) {
+    public void setCurrent(Float current) {
         this.current = current;
     }
 
