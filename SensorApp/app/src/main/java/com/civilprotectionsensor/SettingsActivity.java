@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
+import java.util.Random;
+
 public class SettingsActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     int sessionId;
@@ -28,13 +30,10 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
                     .commit();
         }
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(false);
-        }
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
-        sessionId = Integer.parseInt(readStringSetting("session_id"));
+        this.sessionId = Integer.parseInt(readStringSetting("session_id"));
     }
 
     @Override
