@@ -1,0 +1,14 @@
+[
+  {
+    "type": "smoke",
+    "min": "0",
+    "max": "0.25",
+    "current": "0.13"
+  },
+  {
+    "type": "gas",
+    "min": "0",
+    "max": "11",
+    "current": "5.5"
+  }
+]
