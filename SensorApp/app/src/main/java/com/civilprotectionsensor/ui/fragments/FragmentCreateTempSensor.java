@@ -63,7 +63,7 @@ public class FragmentCreateTempSensor extends Fragment implements View.OnClickLi
     }
 
     private void updateValues() {
-        RangeSlider slider = getView().findViewById(R.id.createTempSensorSlider);
+        RangeSlider slider = requireView().findViewById(R.id.createTempSensorSlider);
         viewModel.setTempMin(slider.getValues().get(0));
         viewModel.setTempMax(slider.getValues().get(1));
     }

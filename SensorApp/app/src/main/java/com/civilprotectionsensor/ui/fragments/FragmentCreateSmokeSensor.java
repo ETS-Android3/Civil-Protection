@@ -63,7 +63,7 @@ public class FragmentCreateSmokeSensor extends Fragment implements View.OnClickL
     }
 
     private void updateValues() {
-        RangeSlider slider = getView().findViewById(R.id.createSmokeSensorSlider);
+        RangeSlider slider = requireView().findViewById(R.id.createSmokeSensorSlider);
         viewModel.setSmokeMin(slider.getValues().get(0));
         viewModel.setSmokeMax(slider.getValues().get(1));
     }

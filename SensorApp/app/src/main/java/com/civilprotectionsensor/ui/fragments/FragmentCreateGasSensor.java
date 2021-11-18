@@ -63,7 +63,7 @@ public class FragmentCreateGasSensor extends Fragment implements View.OnClickLis
     }
 
     private void updateValues() {
-        RangeSlider slider = getView().findViewById(R.id.createGasSensorSlider);
+        RangeSlider slider = requireView().findViewById(R.id.createGasSensorSlider);
         viewModel.setGasMin(slider.getValues().get(0));
         viewModel.setGasMax(slider.getValues().get(1));
     }

@@ -63,7 +63,7 @@ public class FragmentCreateUvSensor extends Fragment implements View.OnClickList
     }
 
     private void updateValues() {
-        RangeSlider slider = getView().findViewById(R.id.createUvSensorSlider);
+        RangeSlider slider = requireView().findViewById(R.id.createUvSensorSlider);
         viewModel.setUvMin(slider.getValues().get(0));
         viewModel.setUvMax(slider.getValues().get(1));
     }
