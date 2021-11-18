@@ -20,7 +20,7 @@ public class Connection extends MqttAsyncClient {
     // Topics to write to:
     final static String clientTopicPrefix = "civil/sensors/";
     // Topics to listen to:
-    final static String serverTopicPrefix = "civil/server/";
+    final static String serverTopicPrefix = "civil/server-sensors/";
     // Preferences
     private String sessionID = "";
     private String serverIp = "";
