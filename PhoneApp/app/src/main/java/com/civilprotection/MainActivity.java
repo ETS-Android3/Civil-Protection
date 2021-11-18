@@ -24,7 +24,7 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
-import com.civilprotection.ui.ItemViewModel;
+import com.civilprotection.ui.viewmodels.FragmentViewModel;
 import com.civilprotection.ui.SectionsPagerAdapter;
 import com.civilprotection.ui.fragments.FragmentData;
 import com.civilprotection.ui.fragments.FragmentPublish;
@@ -54,7 +54,7 @@ import static androidx.preference.PreferenceManager.getDefaultSharedPreferences;
 
 public class MainActivity extends AppCompatActivity implements FragmentPublish.OnPublishListener, FragmentSubscribe.OnSubscribeListener, FragmentData.OnSimulationListener {
 
-    private ItemViewModel viewModel;
+    private FragmentViewModel viewModel;
     ViewPager viewPager;
     Handler handler;
     CallbackHandler.CallBackListener listener;
@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         subscribeFragment = (FragmentSubscribe) getSupportFragmentManager().findFragmentById(R.id.subscribeFragment);
         simulationFragment = (FragmentData) getSupportFragmentManager().findFragmentById(R.id.simulationFragment);
         // Prepare the viewModel for communication between this activity and its child-fragments
-        viewModel = new ViewModelProvider(this).get(ItemViewModel.class);
+        viewModel = new ViewModelProvider(this).get(FragmentViewModel.class);
     }
 
     // Sets up observers to inspect all fragment information to make any request to the server

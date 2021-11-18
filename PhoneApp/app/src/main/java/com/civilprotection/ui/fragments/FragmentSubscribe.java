@@ -15,7 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.civilprotection.R;
-import com.civilprotection.ui.ItemViewModel;
+import com.civilprotection.ui.viewmodels.FragmentViewModel;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +26,7 @@ public class FragmentSubscribe extends Fragment implements View.OnClickListener 
     }
 
     private OnSubscribeListener subscribeListener;
-    private ItemViewModel viewModel;
+    private FragmentViewModel viewModel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -34,7 +34,7 @@ public class FragmentSubscribe extends Fragment implements View.OnClickListener 
         AppCompatButton subscribeBtn = view.findViewById(R.id.subscribeButton);
         subscribeBtn.setOnClickListener(this);
         // Setup viewModel to share data with parent activity
-        viewModel = new ViewModelProvider(requireActivity()).get(ItemViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(FragmentViewModel.class);
         return view;
     }
 

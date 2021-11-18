@@ -1,23 +1,23 @@
-package com.civilprotection.ui;
+package com.civilprotection.ui.viewmodels;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class ItemViewModel extends ViewModel {
+public class FragmentViewModel extends ViewModel {
 
     // Publish Fragment
-    private final MutableLiveData<String> publishTopic = new MutableLiveData<String>();
-    private final MutableLiveData<String> publishMessage = new MutableLiveData<String>();
-    private final MutableLiveData<Integer> publishQos = new MutableLiveData<Integer>();
-    private final MutableLiveData<Boolean> publishRetain = new MutableLiveData<Boolean>();
+    private final MutableLiveData<String> publishTopic = new MutableLiveData<>();
+    private final MutableLiveData<String> publishMessage = new MutableLiveData<>();
+    private final MutableLiveData<Integer> publishQos = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> publishRetain = new MutableLiveData<>();
     // Subscribe Fragment
-    private final MutableLiveData<String> subscribeTopic = new MutableLiveData<String>();
-    private final MutableLiveData<Integer> subscribeQos = new MutableLiveData<Integer>();
+    private final MutableLiveData<String> subscribeTopic = new MutableLiveData<>();
+    private final MutableLiveData<Integer> subscribeQos = new MutableLiveData<>();
     // Simulation Fragment
-    private final MutableLiveData<String> simulationFilePath = new MutableLiveData<String>();
-    private final MutableLiveData<Integer> simulationQos = new MutableLiveData<Integer>();
-    private final MutableLiveData<String> simulationTimeOut = new MutableLiveData<String>();
-    private final MutableLiveData<Boolean> simulationRetain = new MutableLiveData<Boolean>();
+    private final MutableLiveData<String> simulationFilePath = new MutableLiveData<>();
+    private final MutableLiveData<Integer> simulationQos = new MutableLiveData<>();
+    private final MutableLiveData<String> simulationTimeOut = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> simulationRetain = new MutableLiveData<>();
 
     // =============== Publish Fragment ===============
     public void setPublishTopic(String value) {

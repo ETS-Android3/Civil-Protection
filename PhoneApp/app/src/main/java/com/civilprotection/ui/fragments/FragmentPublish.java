@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.civilprotection.R;
-import com.civilprotection.ui.ItemViewModel;
+import com.civilprotection.ui.viewmodels.FragmentViewModel;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +27,7 @@ public class FragmentPublish extends Fragment implements View.OnClickListener {
     }
 
     private OnPublishListener publishListener;
-    private ItemViewModel viewModel;
+    private FragmentViewModel viewModel;
 
     @Override
     public void onAttach(@NotNull Context context) {
@@ -48,7 +48,7 @@ public class FragmentPublish extends Fragment implements View.OnClickListener {
         AppCompatButton publishBtn = view.findViewById(R.id.publishButton);
         publishBtn.setOnClickListener(this);
         // Setup viewModel to share data with parent activity
-        viewModel = new ViewModelProvider(requireActivity()).get(ItemViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(FragmentViewModel.class);
         return view;
     }
 
