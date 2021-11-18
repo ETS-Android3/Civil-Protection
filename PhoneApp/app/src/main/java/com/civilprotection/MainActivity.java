@@ -43,7 +43,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -60,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     Handler handler;
     CallbackHandler.CallBackListener listener;
 
-    int sessionID = -1;
     String serverUri = "";
     Connection connection;
 
@@ -88,17 +86,11 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
 
         setUpConnectionFABListener();
 
-        // If this is the first run of the app
-        if (this.sessionID == -1) {
-            this.sessionID = new Random().nextInt(10000);
-            setStringSetting("session_id", String.valueOf(sessionID));
-        }
-
         // Create the connection and register the callback listener
         this.serverUri = "tcp://" + getResources().getString(R.string.defaultServerIp) + ":" + getResources().getString(R.string.defaultServerPort);
         setupConnectionListener();
         try {
-            connection = new Connection(this.serverUri, String.valueOf(this.sessionID), new MemoryPersistence(), this, listener);
+            connection = new Connection(this.serverUri, readStringSetting("session_id"), new MemoryPersistence(), this, listener);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -107,7 +99,6 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         this.simulationFilePath = "";
         viewModel.setSimulationFilePath(getResources().getString(R.string.simulationPathTextView));
-
     }
 
     @Override
@@ -124,9 +115,10 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             case R.id.resetSettingsMenu:
+                String sessionId = readStringSetting("session_id");
                 getDefaultSharedPreferences(this).edit().clear().apply();
-                // Keep the same session ID
-                setStringSetting("session_id", String.valueOf(this.sessionID));
+                // Restore the session ID
+                setStringSetting("session_id", String.valueOf(sessionId));
                 return true;
             case R.id.exitMenu:
                 showExitDialog();
@@ -520,6 +512,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                 }
             }, 0, 1, TimeUnit.SECONDS);
         }
+
     }
 
 }

@@ -6,11 +6,12 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
+
+import java.util.Random;
 
 public class SettingsActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -28,13 +29,14 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
                     .commit();
         }
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(false);
-        }
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
-        sessionId = Integer.parseInt(readStringSetting("session_id"));
+
+        // If this is the first run of the app
+        if (readStringSetting("session_id").equals("-1")) this.sessionId = new Random().nextInt(10000);
+        else this.sessionId = Integer.parseInt(readStringSetting("session_id"));
+        setStringSetting("session_id", String.valueOf(sessionId));
     }
 
     @Override
