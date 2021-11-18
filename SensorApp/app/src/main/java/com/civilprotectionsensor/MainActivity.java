@@ -1,80 +1,70 @@
 package com.civilprotectionsensor;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 
-import com.civilprotectionsensor.ui.viewmodels.ItemViewModel;
-import com.civilprotectionsensor.ui.fragments.FragmentData;
-import com.civilprotectionsensor.ui.fragments.FragmentPublish;
-import com.civilprotectionsensor.ui.fragments.FragmentSubscribe;
+import com.civilprotectionsensor.ui.fragments.FragmentUvSensor;
+import com.civilprotectionsensor.ui.fragments.FragmentTempSensor;
+import com.civilprotectionsensor.ui.fragments.FragmentSmokeSensor;
+import com.civilprotectionsensor.ui.fragments.FragmentGasSensor;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.slider.Slider;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Environment;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import com.civilprotectionsensor.ui.SectionsPagerAdapter;
-import com.nbsp.materialfilepicker.MaterialFilePicker;
-import com.nbsp.materialfilepicker.ui.FilePickerActivity;
 
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static androidx.preference.PreferenceManager.getDefaultSharedPreferences;
 
-public class MainActivity extends AppCompatActivity implements FragmentPublish.OnPublishListener, FragmentSubscribe.OnSubscribeListener, FragmentData.OnSimulationListener {
+public class MainActivity extends AppCompatActivity {
 
-    private ItemViewModel viewModel;
     private Handler handler;
     private CallbackHandler.CallBackListener listener;
+    SectionsPagerAdapter adapter;
 
-    int sessionID = -1;
     private Connection connection;
-
-    String simulationFilePath;
-    private volatile boolean stopSimulation;
 
     private FloatingActionButton fab;
 
     List<Sensor> sensors = null;
     private final static String sensorConfigFile = "sensors.json";
 
-    private static final int FILE_PICKER_REQUEST_CODE = 1;
-    private static final int NEW_SENSOR_REQUEST_CODE = 2;
+    private static final int NEW_SENSOR_REQUEST_CODE = 1;
+
+    private final AtomicBoolean stopRunnable = new AtomicBoolean(false);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,30 +76,20 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         setSupportActionBar(toolbar);
 
         createTabs();
-        registerFragmentObservers();
 
         setUpConnectionFABListener();
-
-        // If this is the first run of the app
-        if (this.sessionID == -1) {
-            this.sessionID = new Random().nextInt(10000);
-            setStringSetting("session_id", String.valueOf(sessionID));
-        }
 
         // Create the connection and register the callback listener
         String serverUri = "tcp://" + getResources().getString(R.string.defaultServerIp) + ":" + getResources().getString(R.string.defaultServerPort);
         setupConnectionListener();
         try {
-            connection = new Connection(serverUri, String.valueOf(this.sessionID), new MemoryPersistence(), this, listener);
+            connection = new Connection(serverUri, readStringSetting("session_id"), new MemoryPersistence(), this, listener);
         } catch (MqttException e) {
             e.printStackTrace();
         }
 
         handler = new Handler();
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        this.simulationFilePath = "";
-        viewModel.setSimulationFilePath(getResources().getString(R.string.simulationPathTextView));
-
     }
 
     @Override
@@ -129,13 +109,19 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                 startActivityForResult(new Intent(this, SensorCreateActivity.class), NEW_SENSOR_REQUEST_CODE);
                 return true;
             case R.id.resetSettingsMenu:
+                String sessionId = readStringSetting("session_id");
+                boolean isDarkThemeOn = readBooleanSetting("dark_theme");
                 getDefaultSharedPreferences(this).edit().clear().apply();
-                // Keep the same session ID
-                setStringSetting("session_id", String.valueOf(this.sessionID));
+                // Restore the session ID
+                setStringSetting("session_id", sessionId);
+                // Restore the selected theme
+                setBooleanSetting("dark_theme", isDarkThemeOn);
                 // Delete all extra sensors
                 if (sensors.size() > 2) sensors.subList(2, sensors.size()).clear();
+                refreshUi();
                 return true;
             case R.id.exitMenu:
+                Utils.storeJsonContent(this, sensorConfigFile, sensors);
                 showExitDialog();
                 return true;
         }
@@ -143,69 +129,59 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == FILE_PICKER_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showFilePickerDialog();
-            } else {
-                Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK) return;
-        switch (requestCode) {
-            case FILE_PICKER_REQUEST_CODE:
-                simulationFilePath = data.getStringExtra(FilePickerActivity.RESULT_FILE_PATH);
-                assert simulationFilePath != null;
-                viewModel.setSimulationFilePath(simulationFilePath.substring(simulationFilePath.lastIndexOf("/") + 1));
-                break;
-            case NEW_SENSOR_REQUEST_CODE:
-                Sensor s = new Sensor(data.getStringExtra("type"), Float.parseFloat(data.getStringExtra("min")),
-                        Float.parseFloat(data.getStringExtra("max")), Float.parseFloat(data.getStringExtra("current")));
-                sensors.add(s);
-                for (int i = 0; i < sensors.size(); i++) System.out.println(sensors.get(i));
-                Utils.storeJsonContent(this, sensorConfigFile, sensors);
-                sensors = Utils.getJsonContent(this, sensorConfigFile);
-                for (int i = 0; i < sensors.size(); i++) System.out.println(sensors.get(i));
-                break;
-            default:
-                break;
+        if (requestCode == NEW_SENSOR_REQUEST_CODE && resultCode == RESULT_OK) {
+            Sensor s = new Sensor(data.getStringExtra("type"), Float.parseFloat(data.getStringExtra("min")),
+                    Float.parseFloat(data.getStringExtra("max")), Float.parseFloat(data.getStringExtra("current")));
+            sensors.add(s);
+            refreshUi();
         }
     }
 
     private void createTabs() {
-        // Read the configuration file to create all sensor fragments
-        sensors = Utils.getJsonContent(this, sensorConfigFile);
+        adapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        // If this is the first run of the app, load the default sensors
+        if (readStringSetting("session_id").equals("-1")) {
+            setStringSetting("session_id", String.valueOf(new Random().nextInt(10000)));
+            System.out.println("First time");
+            sensors = Utils.getJsonContent(this, sensorConfigFile, true);
+            Utils.storeJsonContent(this, sensorConfigFile, sensors);
+        } else {
+            // Otherwise load the sensors the app has stored
+            sensors = Utils.getJsonContent(this, sensorConfigFile, false);
+        }
         ViewPager viewPager = findViewById(R.id.viewPager);
         TabLayout tabs = findViewById(R.id.tabs);
-        SectionsPagerAdapter adapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
-        adapter.addFragment(new FragmentPublish(), getResources().getString(R.string.tab_1_title));
-        adapter.addFragment(new FragmentSubscribe(), getResources().getString(R.string.tab_2_title));
-        adapter.addFragment(new FragmentData(), getResources().getString(R.string.tab_3_title));
+        int smokeCounter = 0, gasCounter = 0, tempCounter = 0, uvCounter = 0;
+        for (int sensor = 0; sensor < sensors.size(); sensor++) {
+            Fragment fragment = null;
+            Bundle bundle = new Bundle();
+            bundle.putFloatArray("args", new float[] {sensors.get(sensor).getMin(), sensors.get(sensor).getMax(), sensors.get(sensor).getCurrent()});
+            switch (sensors.get(sensor).getType()) {
+                case "smoke":
+                    fragment = new FragmentSmokeSensor();
+                    adapter.addFragment(fragment, getResources().getString(R.string.tab_smoke_title) + " " + ++smokeCounter);
+                    break;
+                case "gas":
+                    fragment = new FragmentGasSensor();
+                    adapter.addFragment(fragment, getResources().getString(R.string.tab_gas_title) + " " + ++gasCounter);
+                    break;
+                case "temp":
+                    fragment = new FragmentTempSensor();
+                    adapter.addFragment(fragment, getResources().getString(R.string.tab_temp_title) + " " + ++tempCounter);
+                    break;
+                case "uv":
+                    fragment = new FragmentUvSensor();
+                    adapter.addFragment(fragment, getResources().getString(R.string.tab_uv_title) + " " + ++uvCounter);
+                    break;
+                default:
+                    break;
+            }
+            if (fragment != null) fragment.setArguments(bundle);
+        }
         viewPager.setAdapter(adapter);
         tabs.setupWithViewPager(viewPager);
-        viewModel = new ViewModelProvider(this).get(ItemViewModel.class);
-    }
-
-    // Sets up observers to inspect all fragment information to make any request to the server
-    private void registerFragmentObservers() {
-        // Publish fields
-        viewModel.getPublishTopic().observe(this, topic -> connection.setPubTopic(topic));
-        viewModel.getPublishMessage().observe(this, message -> connection.setMessage(message));
-        viewModel.getPublishQos().observe(this, qos -> connection.setQos(qos));
-        viewModel.getPublishRetain().observe(this, retain -> connection.setRetain(retain));
-        // Subscribe fields
-        viewModel.getSubscribeTopic().observe(this, topic -> connection.setSubTopic(topic));
-        viewModel.getSubscribeQos().observe(this, qos -> connection.setQos(qos));
-        // Simulation fields
-        viewModel.getSimulationQos().observe(this, qos -> connection.setQos(qos));
-        viewModel.getSimulationTimeOut().observe(this, time -> connection.setMaxSimulationTime(Integer.parseInt(time)));
-        viewModel.getSimulationRetain().observe(this, retain -> connection.setRetain(retain));
     }
 
     private void setupConnectionListener() {
@@ -237,6 +213,8 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
             IMqttToken token = connection.connect(connection.getConnectOptions());
             token.waitForCompletion(1000);
             onConnectSuccess();
+            // Subscribe by default to all available topic with QoS Exactly Once
+            subscribe("#", 2);
         } catch (MqttException e) {
             onConnectFailure();
             e.printStackTrace();
@@ -250,11 +228,11 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         if (connection.isConnected()) {
             turnOnFAB();
             try {
-                connection.publish(topic, message).waitForCompletion();
-                System.out.println("Successfully published \"" + payload + "\" to " + topic);
+                connection.publish(connection.getPubTopic(), message).waitForCompletion();
+                System.out.println("Successfully published \"" + payload + "\" to " + connection.getPubTopic());
                 Toast.makeText(this, "Published \"" + payload + "\" to " + topic, Toast.LENGTH_SHORT).show();
             } catch (MqttException e) {
-                System.err.println("Failed to publish \"" + payload + "\" to " + topic);
+                System.err.println("Failed to publish \"" + payload + "\" to " + connection.getPubTopic());
                 e.printStackTrace();
             }
         } else {
@@ -267,11 +245,12 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         if (connection.isConnected()) {
             turnOnFAB();
             try {
-                connection.subscribe(topic, qos);
-                System.out.println("Successfully subscribed to " + topic);
+                connection.setSubTopic(topic);
+                connection.subscribe(connection.getSubTopic(), qos);
+                System.out.println("Successfully subscribed to " + connection.getSubTopic());
                 Toast.makeText(this, "Subscribed to " + topic, Toast.LENGTH_SHORT).show();
             } catch (MqttException e) {
-                System.err.println("Failed to subscribe to " + topic);
+                System.err.println("Failed to subscribe to " + connection.getSubTopic());
                 e.printStackTrace();
             }
         } else {
@@ -299,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     private void disconnect() {
         try {
             // Unsubscribe from all available topics
-            unsubscribe("civil/server/" + connection.getSessionID() + "/#");
+            unsubscribe("civil/server-sensors/" + connection.getSessionID() + "/#");
             IMqttToken token = connection.disconnect();
             token.waitForCompletion(1000);
             onDisconnectSuccess();
@@ -309,62 +288,52 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         }
     }
 
-    @Override
-    public void onPublishPressed() {
-        if (connection.getPubTopic().substring(connection.getPubTopic().lastIndexOf("/") + 1).isEmpty())
-            Toast.makeText(this, "You need to specify the topic!", Toast.LENGTH_SHORT).show();
-        else if (connection.getMessage().isEmpty())
-            Toast.makeText(this, "Fill out a message first!", Toast.LENGTH_SHORT).show();
-        else publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain());
-    }
-
-    @Override
-    public void onSubscribePressed() {
-        if (connection.getSubTopic().substring(connection.getSubTopic().lastIndexOf("/") + 1).isEmpty())
-            Toast.makeText(this, "You need to specify the topic!", Toast.LENGTH_SHORT).show();
-        else subscribe(connection.getSubTopic(), connection.getQos());
-    }
-
-    @Override
-    public void onSelectFilePressed() {
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, FILE_PICKER_REQUEST_CODE);
-        } else showFilePickerDialog();
-    }
-
-    @Override
-    public void onStartPressed() {
-        if (connection.isConnected()) {
-            if (simulationFilePath.isEmpty()) {
-                Toast.makeText(this, "You haven't chosen any file!", Toast.LENGTH_SHORT).show();
-            } else {
-                if (connection.getMaxSimulationTime() == 0) {
-                    Toast.makeText(this, "Timeout was not set. Default behavior will be applied", Toast.LENGTH_SHORT).show();
-                    connection.setMaxSimulationTime(0);
+    // Returns a map of all sensors on the current fragments along with their status
+    HashMap<Sensor, Boolean> getCurrentSensors() {
+        HashMap<Sensor, Boolean> currentSensors = new HashMap<>();
+        for (int sensor = 0; sensor < sensors.size(); sensor++) {
+            CheckBox checkBox = null;
+            Slider slider = null;
+            boolean isActive = false;
+            // Double-check if the fragment of this sensor is attached
+            if (adapter.getItem(sensor).isAdded()) {
+                switch (sensors.get(sensor).getType()) {
+                    case "smoke":
+                        checkBox = adapter.getItem(sensor).requireView().findViewById(R.id.smokeSensorActiveCheckBox);
+                        slider = adapter.getItem(sensor).requireView().findViewById(R.id.smokeSensorSlider);
+                        break;
+                    case "gas":
+                        checkBox = adapter.getItem(sensor).requireView().findViewById(R.id.gasSensorActiveCheckBox);
+                        slider = adapter.getItem(sensor).requireView().findViewById(R.id.gasSensorSlider);
+                        break;
+                    case "temp":
+                        checkBox = adapter.getItem(sensor).requireView().findViewById(R.id.tempSensorActiveCheckBox);
+                        slider = adapter.getItem(sensor).requireView().findViewById(R.id.tempSensorSlider);
+                        break;
+                    case "uv":
+                        checkBox = adapter.getItem(sensor).requireView().findViewById(R.id.uvSensorActiveCheckBox);
+                        slider = adapter.getItem(sensor).requireView().findViewById(R.id.uvSensorSlider);
+                        break;
+                    default:
+                        break;
                 }
-                Toast.makeText(this, "Starting simulation", Toast.LENGTH_SHORT).show();
-                SimulationRunnable runnable = new SimulationRunnable(simulationFilePath, connection.getMaxSimulationTime(), connection.getQos(), connection.isRetain());
-                stopSimulation = false;
-                new Thread(runnable).start();
             }
-        } else {
-            Toast.makeText(this, "You need to connect first!", Toast.LENGTH_SHORT).show();
+            if (checkBox != null) isActive = checkBox.isChecked();
+            if (slider != null) sensors.get(sensor).setCurrent(slider.getValue());
+            if (checkBox != null && slider != null) currentSensors.put(sensors.get(sensor), isActive);
         }
+        return currentSensors;
     }
 
-    @Override
-    public void onStopPressed() {
-        stopSimulation = true;
-        Toast.makeText(this, "Stopping simulation", Toast.LENGTH_SHORT).show();
-    }
-
-    public void onConnectSuccess() {
+    private void onConnectSuccess() {
         turnOnFAB();
         System.out.println("Successfully connected to " + connection.getServerUri());
         Toast.makeText(this, "Connected to " + connection.getServerIp(), Toast.LENGTH_SHORT).show();
+        SensorRunnable runnable = new SensorRunnable();
+        new Thread(runnable).start();
     }
 
-    public void onConnectFailure() {
+    private void onConnectFailure() {
         turnOffFAB();
         System.err.println("Failed to connect to " + connection.getServerUri());
         if (connection.isInternetServiceAvailable())
@@ -372,24 +341,25 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         else Toast.makeText(this, "Failed to connect. Please check your internet connection and retry!", Toast.LENGTH_SHORT).show();
     }
 
-    public void onDisconnectSuccess() {
+    private void onDisconnectSuccess() {
+        stopRunnable.set(true);
         turnOffFAB();
         System.out.println("Successfully disconnected from " + connection.getServerUri());
         Toast.makeText(this, "Disconnected from " + connection.getServerIp(), Toast.LENGTH_SHORT).show();
     }
 
-    public void onDisconnectFailure() {
+    private void onDisconnectFailure() {
         turnOnFAB();
         System.out.println("Failed to disconnect from " + connection.getServerUri());
         Toast.makeText(this, "Failed to disconnect from " + connection.getServerIp(), Toast.LENGTH_SHORT).show();
     }
 
-    public void handleMessageArrived(String topic, MqttMessage message) {
+    private void handleMessageArrived(String topic, MqttMessage message) {
         System.out.println("Received " + message + " in " + topic);
         Toast.makeText(connection.getContext(), "Received " + message + " in " + topic, Toast.LENGTH_SHORT).show();
     }
 
-    public void handleConnectionLost() {
+    private void handleConnectionLost() {
         turnOffFAB();
         System.out.println("Connection was lost!");
         Toast.makeText(this, "Connection was lost!", Toast.LENGTH_SHORT).show();
@@ -433,6 +403,13 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         fab.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_tethering_off, null));
     }
 
+    private void refreshUi() {
+        Utils.storeJsonContent(this, sensorConfigFile, sensors);
+        finish();
+        startActivity(getIntent());
+        overridePendingTransition(0, 0);
+    }
+
     // Retrieves value of string-type setting "key"
     public String readStringSetting(String key) {
         return getDefaultSharedPreferences(this).getString(key, "-1");
@@ -463,20 +440,6 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         getDefaultSharedPreferences(this).edit().putBoolean(key, value).apply();
     }
 
-    private void showFilePickerDialog() {
-        new MaterialFilePicker()
-                .withActivity(this)
-                .withCloseMenu(true)
-                .withPath(Environment.getExternalStorageDirectory().getAbsolutePath())
-                .withRootPath(Environment.getExternalStorageDirectory().getAbsolutePath())
-                .withHiddenFiles(false)
-                .withFilter(Pattern.compile(".*\\.(csv)$"))
-                .withFilterDirectories(false)
-                .withTitle("Select a file")
-                .withRequestCode(FILE_PICKER_REQUEST_CODE)
-                .start();
-    }
-
     private void showExitDialog() {
         AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(this);
@@ -492,48 +455,27 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         showExitDialog();
     }
 
-    class SimulationRunnable implements Runnable {
-
-        String file;
-        int lineNumber;
-        String line;
-        int timeout;
-        int qos;
-        boolean retain;
-
-        SimulationRunnable(String file, int timeout, int qos, boolean retain) {
-            this.file = file;
-            this.lineNumber = 0;
-            this.line = "";
-            this.timeout = timeout;
-            this.qos = qos;
-            this.retain = retain;
-        }
+    class SensorRunnable implements Runnable {
 
         @Override
         public void run() {
-            ArrayList<String> lines = new ArrayList<>();
-            // Read the whole file and store its rows into "lines" list
-            try {
-                Scanner scanner = new Scanner(new File(file)).useDelimiter(System.lineSeparator());
-                while (scanner.hasNextLine()) lines.add(scanner.nextLine());
-                scanner.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            if (timeout == 0) timeout = lines.size();
+            stopRunnable.set(false);
             ScheduledExecutorService service = Executors.newScheduledThreadPool(0);
             ScheduledFuture<?> serviceHandler = service.scheduleAtFixedRate(() -> {
-                if (lineNumber >= lines.size() || lineNumber >= timeout || stopSimulation) {
+                if (stopRunnable.get()) {
                     service.shutdownNow();
                 } else {
-                    // Save current data to pass to main thread, or they might be updated before being consumed
-                    String currentLine = lines.get(lineNumber);
-                    // Reset the publishing topic
-                    connection.setPubTopic("");
+                    HashMap<Sensor, Boolean> sensors = getCurrentSensors();
+                    StringBuilder payload = new StringBuilder();
+                    for (Map.Entry<Sensor, Boolean> entry : sensors.entrySet()) {
+                        connection.setPubTopic("data");
+                        if (entry.getValue().toString().equals("true"))
+                            payload.append(entry.getKey().getType()).append(";").append(entry.getKey().getCurrent()).append(";");
+                    }
+                    connection.setPubTopic("data");
+                    connection.setMessage(payload.toString().substring(0, payload.toString().length() - 1));
                     // Assign job to Main thread
-                    handler.post(() -> publish(connection.getPubTopic() + "simulation", currentLine, connection.getQos(), connection.isRetain()));
-                    lineNumber++;
+                    handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
                 }
             }, 0, 1, TimeUnit.SECONDS);
         }
