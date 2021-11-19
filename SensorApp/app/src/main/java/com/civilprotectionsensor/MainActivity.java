@@ -1,22 +1,30 @@
 package com.civilprotectionsensor;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.civilprotectionsensor.ui.fragments.FragmentUvSensor;
 import com.civilprotectionsensor.ui.fragments.FragmentTempSensor;
 import com.civilprotectionsensor.ui.fragments.FragmentSmokeSensor;
 import com.civilprotectionsensor.ui.fragments.FragmentGasSensor;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.slider.Slider;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
@@ -36,6 +44,7 @@ import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -63,9 +72,23 @@ public class MainActivity extends AppCompatActivity {
     private final static String sensorConfigFile = "sensors.json";
 
     private static final int NEW_SENSOR_REQUEST_CODE = 1;
+    private static final int LOCATION_PROVIDER_CODE = 2;
 
-    private final AtomicBoolean stopRunnable = new AtomicBoolean(false);
+    private final AtomicBoolean stopRunnable = new AtomicBoolean(true);
+    private final AtomicBoolean gpsPermissionGranted = new AtomicBoolean(false);
+    private final AtomicBoolean gpsReady = new AtomicBoolean(false);
+    private FusedLocationProviderClient locationProvider;
+    private static final String[][] MANUAL_COORDS = {
+        {"37.96809452684323", "23.76630586399502"},
+        {"37.96799937191987", "23.766603589104385"},
+        {"37.967779456380754", "23.767174897611685"},
+        {"37.96790421900921", "23.76626294807113"}
+    };
+    private String latitude = "";
+    private String longitude = "";
+    BatteryManager batteryManager;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         handler = new Handler();
+        locationProvider = LocationServices.getFusedLocationProviderClient(this);
+        batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
@@ -129,6 +154,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PROVIDER_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                gpsPermissionGranted.set(true);
+                setUpLocationProvider();
+            } else {
+                stopRunnable.set(true);
+                gpsPermissionGranted.set(false);
+                Toast.makeText(this, "You need to give location permission to enable Auto Coordinates mode", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == NEW_SENSOR_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -157,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
         for (int sensor = 0; sensor < sensors.size(); sensor++) {
             Fragment fragment = null;
             Bundle bundle = new Bundle();
-            bundle.putFloatArray("args", new float[] {sensors.get(sensor).getMin(), sensors.get(sensor).getMax(), sensors.get(sensor).getCurrent()});
+            bundle.putFloatArray("args", new float[]{sensors.get(sensor).getMin(), sensors.get(sensor).getMax(), sensors.get(sensor).getCurrent()});
             switch (sensors.get(sensor).getType()) {
                 case "smoke":
                     fragment = new FragmentSmokeSensor();
@@ -329,8 +369,55 @@ public class MainActivity extends AppCompatActivity {
         turnOnFAB();
         System.out.println("Successfully connected to " + connection.getServerUri());
         Toast.makeText(this, "Connected to " + connection.getServerIp(), Toast.LENGTH_SHORT).show();
-        SensorRunnable runnable = new SensorRunnable();
-        new Thread(runnable).start();
+        // Check which location mode is selected
+        if (readBooleanSetting("auto_coords")) {
+            // Auto mode connection - Pick coordinates from GPS sensor
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_PROVIDER_CODE);
+            } else {
+                gpsPermissionGranted.set(true);
+                setUpLocationProvider();
+            }
+        } else {
+            // Manual mode connection - Pick coordinates from preferences
+            switch (Integer.parseInt(readStringSetting("location"))) {
+                case 0:
+                    latitude = MANUAL_COORDS[0][0];
+                    longitude = MANUAL_COORDS[0][1];
+                    break;
+                case 1:
+                    latitude = MANUAL_COORDS[1][0];
+                    longitude = MANUAL_COORDS[1][1];
+                    break;
+                case 2:
+                    latitude = MANUAL_COORDS[2][0];
+                    longitude = MANUAL_COORDS[2][1];
+                    break;
+                case 3:
+                    latitude = MANUAL_COORDS[3][0];
+                    longitude = MANUAL_COORDS[3][1];
+                    break;
+            }
+            SensorRunnable runnable = new SensorRunnable();
+            new Thread(runnable).start();
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void setUpLocationProvider() {
+        locationProvider.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                latitude = String.valueOf(location.getLatitude());
+                longitude = String.valueOf(location.getLongitude());
+                gpsReady.set(true);
+                gpsPermissionGranted.set(true);
+                if (stopRunnable.get()) {
+                    SensorRunnable runnable = new SensorRunnable();
+                    new Thread(runnable).start();
+                }
+            }
+        });
     }
 
     private void onConnectFailure() {
@@ -440,6 +527,11 @@ public class MainActivity extends AppCompatActivity {
         getDefaultSharedPreferences(this).edit().putBoolean(key, value).apply();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private String getBatteryLevel() {
+        return String.valueOf(batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
+    }
+
     private void showExitDialog() {
         AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(this);
@@ -457,6 +549,7 @@ public class MainActivity extends AppCompatActivity {
 
     class SensorRunnable implements Runnable {
 
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void run() {
             stopRunnable.set(false);
@@ -465,20 +558,25 @@ public class MainActivity extends AppCompatActivity {
                 if (stopRunnable.get()) {
                     service.shutdownNow();
                 } else {
-                    HashMap<Sensor, Boolean> sensors = getCurrentSensors();
-                    StringBuilder payload = new StringBuilder();
-                    for (Map.Entry<Sensor, Boolean> entry : sensors.entrySet()) {
+                    if (!readBooleanSetting("auto_coords") || (gpsPermissionGranted.get() && gpsReady.get())) {
+                        HashMap<Sensor, Boolean> sensors = getCurrentSensors();
+                        StringBuilder payload = new StringBuilder();
+                        payload.append(latitude).append(";").append(longitude).append(";").append(getBatteryLevel()).append(";");
+                        for (Map.Entry<Sensor, Boolean> entry : sensors.entrySet()) {
+                            connection.setPubTopic("data");
+                            if (entry.getValue().toString().equals("true"))
+                                payload.append(entry.getKey().getType()).append(";").append(entry.getKey().getCurrent()).append(";");
+                        }
                         connection.setPubTopic("data");
-                        if (entry.getValue().toString().equals("true"))
-                            payload.append(entry.getKey().getType()).append(";").append(entry.getKey().getCurrent()).append(";");
+                        connection.setMessage(payload.toString().substring(0, payload.toString().length() - 1));
+                        // Assign job to Main thread
+                        handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
                     }
-                    connection.setPubTopic("data");
-                    connection.setMessage(payload.toString().substring(0, payload.toString().length() - 1));
-                    // Assign job to Main thread
-                    handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
                 }
             }, 0, 1, TimeUnit.SECONDS);
+
         }
+
     }
 
 }
