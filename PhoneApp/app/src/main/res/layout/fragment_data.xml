@@ -109,10 +109,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginStart="8dp"
                 android:gravity="center">
 
                 <TextView
@@ -135,20 +132,32 @@
                     android:typeface="serif" />
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1" />
-
-                <TextView
                     android:id="@+id/simulationRetainedTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
                     android:text="@string/retainedTextView"
                     android:textStyle="bold"
                     android:typeface="serif" />
 
                 <CheckBox
                     android:id="@+id/simulationRetainedCheckBox"
+                    android:layout_width="30dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="0dp"
+                    android:buttonTint="@android:color/holo_blue_dark"
+                    android:text="@string/empty" />
+
+                <TextView
+                    android:id="@+id/simulationAutoCoordsTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/simulationAutoCoordsTextView"
+                    android:textStyle="bold"
+                    android:typeface="serif" />
+
+                <CheckBox
+                    android:id="@+id/simulationAutoCoordsCheckBox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:buttonTint="@android:color/holo_blue_dark"
