@@ -12,6 +12,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class Connection extends MqttAsyncClient {
 
@@ -40,7 +41,8 @@ public class Connection extends MqttAsyncClient {
     private String pubTopic = "";
     private String subTopic = "";
     private String message = "";
-    private boolean retain;
+    private boolean retain = false;
+    private boolean autoMode = false;
     private int maxSimulationTime = 10;
 
     public Connection(String serverURI, String sessionId, MemoryPersistence persistence, Context context, com.civilprotection.CallbackHandler.CallBackListener listener) throws MqttException {
@@ -139,8 +141,8 @@ public class Connection extends MqttAsyncClient {
 
     public boolean isInternetServiceAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        return connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
-                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED;
+        return Objects.requireNonNull(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE)).getState() == NetworkInfo.State.CONNECTED ||
+            Objects.requireNonNull(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)).getState() == NetworkInfo.State.CONNECTED;
     }
 
     public Context getContext() {
@@ -301,6 +303,14 @@ public class Connection extends MqttAsyncClient {
 
     public void setRetain(boolean retain) {
         this.retain = retain;
+    }
+
+    public boolean isAutoMode()  {
+        return autoMode;
+    }
+
+    public void setAutoMode(boolean AutoMode)  {
+        this.autoMode = AutoMode;
     }
 
     public int getMaxSimulationTime() {
