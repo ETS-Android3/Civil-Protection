@@ -47,7 +47,6 @@
 
     <string name="topicTextView">Topic</string>
     <string name="topicPlaceholder">test/topic</string>
-
     <string name="messageTextView">Message</string>
     <string name="messagePlaceholder">Hello World!</string>
 
@@ -63,6 +62,7 @@
     <string name="simulationFileTextView">Simulation file:</string>
     <string name="simulationFileButton">Select file</string>
     <string name="simulationPathTextView">Not selected</string>
+    <string name="simulationAutoCoordsTextView">Auto Mode</string>
 
     <!-- Others -->
     <string name="empty" />
