@@ -158,7 +158,6 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PROVIDER_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                gpsPermissionGranted.set(true);
                 setUpLocationProvider();
             } else {
                 stopRunnable.set(true);
@@ -376,7 +375,6 @@ public class MainActivity extends AppCompatActivity {
                     ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_PROVIDER_CODE);
             } else {
-                gpsPermissionGranted.set(true);
                 setUpLocationProvider();
             }
         } else {
@@ -412,10 +410,8 @@ public class MainActivity extends AppCompatActivity {
                 longitude = String.valueOf(location.getLongitude());
                 gpsReady.set(true);
                 gpsPermissionGranted.set(true);
-                if (stopRunnable.get()) {
-                    SensorRunnable runnable = new SensorRunnable();
-                    new Thread(runnable).start();
-                }
+                SensorRunnable runnable = new SensorRunnable();
+                new Thread(runnable).start();
             }
         });
     }
