@@ -18,6 +18,7 @@ public class FragmentViewModel extends ViewModel {
     private final MutableLiveData<Integer> simulationQos = new MutableLiveData<>();
     private final MutableLiveData<String> simulationTimeOut = new MutableLiveData<>();
     private final MutableLiveData<Boolean> simulationRetain = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> simulationAutoMode = new MutableLiveData<>();
 
     // =============== Publish Fragment ===============
     public void setPublishTopic(String value) {
@@ -100,6 +101,14 @@ public class FragmentViewModel extends ViewModel {
 
     public MutableLiveData<Boolean> getSimulationRetain() {
         return simulationRetain;
+    }
+
+    public void setSimulationAutoMode(Boolean value) {
+        simulationAutoMode.setValue(value);
+    }
+
+    public MutableLiveData<Boolean> getSimulationAutoMode() {
+        return simulationAutoMode;
     }
 
 }

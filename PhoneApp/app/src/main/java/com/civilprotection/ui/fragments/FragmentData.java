@@ -113,6 +113,8 @@ public class FragmentData extends Fragment implements View.OnClickListener {
         else viewModel.setSimulationTimeOut("0");
         CheckBox retain = requireView().findViewById(R.id.simulationRetainedCheckBox);
         viewModel.setSimulationRetain(retain.isChecked());
+        CheckBox AutoMode = requireView().findViewById(R.id.simulationAutoCoordsCheckBox);
+        viewModel.setSimulationAutoMode(AutoMode.isChecked());
     }
 
 }

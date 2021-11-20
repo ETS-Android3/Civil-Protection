@@ -29,6 +29,8 @@ import com.civilprotection.ui.SectionsPagerAdapter;
 import com.civilprotection.ui.fragments.FragmentData;
 import com.civilprotection.ui.fragments.FragmentPublish;
 import com.civilprotection.ui.fragments.FragmentSubscribe;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.nbsp.materialfilepicker.MaterialFilePicker;
@@ -48,7 +50,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+
+import android.os.Vibrator;
+import android.media.MediaPlayer;
+import android.media.AudioManager;
 
 import static androidx.preference.PreferenceManager.getDefaultSharedPreferences;
 
@@ -66,21 +73,26 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     FragmentSubscribe subscribeFragment;
     FragmentData simulationFragment;
 
-    String simulationFilePath;
-    private volatile boolean stopSimulation;
+    private String simulationFilePath;
+    private int lineNumber = 0;
+    private final AtomicBoolean stopSimulation = new AtomicBoolean(true);
+    private final AtomicBoolean gpsPermissionGranted = new AtomicBoolean(false);
+    private final AtomicBoolean gpsReady = new AtomicBoolean(false);
+    private String latitude = "";
+    private String longitude = "";
     private static final int FILE_PICKER_REQUEST_CODE = 1;
+    private static final int LOCATION_PROVIDER_CODE = 2;
 
     FloatingActionButton fab;
+    private FusedLocationProviderClient locationProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setUpTheme();
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         createTabs();
         registerFragmentObservers();
 
@@ -96,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         }
 
         handler = new Handler();
+        locationProvider = LocationServices.getFusedLocationProviderClient(this);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         this.simulationFilePath = "";
         viewModel.setSimulationFilePath(getResources().getString(R.string.simulationPathTextView));
@@ -120,6 +133,9 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                 // Restore the session ID
                 setStringSetting("session_id", String.valueOf(sessionId));
                 return true;
+            case R.id.showAlertMenu:
+                showAlertDialog(true, "You are in danger!");
+                return true;
             case R.id.exitMenu:
                 showExitDialog();
                 return true;
@@ -130,12 +146,23 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     @Override
     public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == FILE_PICKER_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showFilePickerDialog();
-            } else {
-                Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT).show();
-            }
+        switch (requestCode) {
+            case FILE_PICKER_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) showFilePickerDialog();
+                else Toast.makeText(this, "Allow permission for storage access!", Toast.LENGTH_SHORT).show();
+                break;
+            case LOCATION_PROVIDER_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    gpsPermissionGranted.set(true);
+                    setUpLocationProvider();
+                } else {
+                    stopSimulation.set(true);
+                    gpsPermissionGranted.set(false);
+                    Toast.makeText(this, "You need to give location permission to enable Auto Coordinates mode", Toast.LENGTH_LONG).show();
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -180,6 +207,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         viewModel.getSimulationQos().observe(this, qos -> connection.setQos(qos));
         viewModel.getSimulationTimeOut().observe(this, time -> connection.setMaxSimulationTime(Integer.parseInt(time)));
         viewModel.getSimulationRetain().observe(this, retain -> connection.setRetain(retain));
+        viewModel.getSimulationAutoMode().observe(this, autoMode -> connection.setAutoMode(autoMode));
     }
 
     private void setupConnectionListener() {
@@ -310,17 +338,25 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     @Override
     public void onStartPressed() {
         if (connection.isConnected()) {
-            if (simulationFilePath.isEmpty()) {
-                Toast.makeText(this, "You haven't chosen any file!", Toast.LENGTH_SHORT).show();
-            } else {
-                if (connection.getMaxSimulationTime() == 0) {
-                    Toast.makeText(this, "Timeout was not set. Default behavior will be applied", Toast.LENGTH_SHORT).show();
-                    connection.setMaxSimulationTime(0);
+            if (stopSimulation.get()) {
+                if (connection.isAutoMode()) {
+                    // Auto mode connection - Pick coordinates from GPS sensor
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_PROVIDER_CODE);
+                    } else {
+                        setUpLocationProvider();
+                    }
+                } else {
+                    if (simulationFilePath.isEmpty()) {
+                        Toast.makeText(this, "You haven't chosen any file!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        SimulationRunnable runnable = new SimulationRunnable(simulationFilePath, connection.getMaxSimulationTime());
+                        new Thread(runnable).start();
+                    }
                 }
-                Toast.makeText(this, "Starting simulation", Toast.LENGTH_SHORT).show();
-                SimulationRunnable runnable = new SimulationRunnable(simulationFilePath, connection.getMaxSimulationTime());
-                stopSimulation = false;
-                new Thread(runnable).start();
+            } else {
+                Toast.makeText(this, "You need to wait until the previous simulation ends to press the Start Button again!", Toast.LENGTH_LONG).show();
             }
         } else {
             Toast.makeText(this, "You need to connect first!", Toast.LENGTH_SHORT).show();
@@ -329,8 +365,22 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
 
     @Override
     public void onStopPressed() {
-        stopSimulation = true;
+        stopSimulation.set(true);
         Toast.makeText(this, "Stopping simulation", Toast.LENGTH_SHORT).show();
+    }
+
+    @SuppressLint("MissingPermission")
+    private void setUpLocationProvider() {
+        locationProvider.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                latitude = String.valueOf(location.getLatitude());
+                longitude = String.valueOf(location.getLongitude());
+                gpsReady.set(true);
+                gpsPermissionGranted.set(true);
+                SimulationRunnable runnable = new SimulationRunnable(simulationFilePath, connection.getMaxSimulationTime());
+                new Thread(runnable).start();
+            }
+        });
     }
 
     private void onConnectSuccess() {
@@ -344,8 +394,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         System.err.println("Failed to connect to " + connection.getServerUri());
         if (connection.isInternetServiceAvailable())
             Toast.makeText(this, "Failed to connect. Please check your IP/port settings and retry!", Toast.LENGTH_LONG).show();
-        else
-            Toast.makeText(this, "Failed to connect. Please check your internet connection and retry!", Toast.LENGTH_SHORT).show();
+        else Toast.makeText(this, "Failed to connect. Please check your internet connection and retry!", Toast.LENGTH_SHORT).show();
     }
 
     private void onDisconnectSuccess() {
@@ -361,6 +410,8 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     }
 
     private void handleMessageArrived(String topic, MqttMessage message) {
+        // Parse topic to find out what type of danger it is
+        showAlertDialog(true, "You are in danger!");
         System.out.println("Received " + message + " in " + topic);
         Toast.makeText(connection.getContext(), "Received " + message + " in " + topic, Toast.LENGTH_SHORT).show();
     }
@@ -453,6 +504,35 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
             .start();
     }
 
+    private void showAlertDialog(boolean alertFlag, String message) {
+        AlertDialog.Builder builder;
+        builder = new AlertDialog.Builder(this);
+        builder.setTitle("Alert");
+        builder.setMessage(message);
+        Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        vibrator.vibrate(1000);
+        MediaPlayer mediaPlayer;
+        if (alertFlag) {
+            // High level danger : server returns 1
+            mediaPlayer = MediaPlayer.create(this, R.raw.alert_high);
+        } else {
+            // Medium level danger : server returns 0
+            mediaPlayer = MediaPlayer.create(this, R.raw.alert);
+        }
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mediaPlayer.start();
+        builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
+            mediaPlayer.stop();
+            dialogInterface.dismiss();
+        });
+        //mediaPlayer.release();
+        builder.setOnDismissListener(dialogInterface -> {
+            mediaPlayer.stop();
+            dialogInterface.dismiss();
+        });
+        builder.show();
+    }
+
     private void showExitDialog() {
         AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(this);
@@ -471,46 +551,66 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     class SimulationRunnable implements Runnable {
 
         String file;
-        int lineNumber;
         String line;
         int timeout;
 
         SimulationRunnable(String file, int timeout) {
             this.file = file;
-            this.lineNumber = 0;
             this.line = "";
             this.timeout = timeout;
         }
 
         @Override
         public void run() {
-            ArrayList<String> lines = new ArrayList<>();
-            // Read the whole file and store its rows into "lines" list
-            try {
-                Scanner scanner = new Scanner(new File(file)).useDelimiter(System.lineSeparator());
-                while (scanner.hasNextLine()) {
-                    lines.add(scanner.nextLine());
-                }
-                scanner.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            if (timeout == 0) timeout = lines.size();
+            stopSimulation.set(false);
+            handler.post(() -> Toast.makeText(getApplicationContext(), "Starting simulation", Toast.LENGTH_SHORT).show());
             ScheduledExecutorService service = Executors.newScheduledThreadPool(0);
-            ScheduledFuture<?> serviceHandler = service.scheduleAtFixedRate(() -> {
-                if (lineNumber >= lines.size() || lineNumber >= timeout || stopSimulation) {
-                    service.shutdownNow();
-                } else {
-                    // Save current data to pass to main thread, or they might be updated before being consumed
-                    String currentLine = lines.get(lineNumber);
-                    // Reset the publishing topic
-                    connection.setPubTopic("simulation");
-                    connection.setMessage(currentLine);
-                    // Assign job to Main thread
-                    handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
-                    lineNumber++;
+            if (connection.isAutoMode()) {
+                handler.post(() -> Toast.makeText(getApplicationContext(), "Using Auto Mode", Toast.LENGTH_SHORT).show());
+                ScheduledFuture<?> serviceHandler = service.scheduleAtFixedRate(() -> {
+                    if (stopSimulation.get()) {
+                        service.shutdownNow();
+                    } else {
+                        if (gpsPermissionGranted.get() && gpsReady.get()) {
+                            // Set the publishing topic
+                            connection.setPubTopic("simulation");
+                            connection.setMessage(latitude + ";" + longitude);
+                            // Assign job to Main thread
+                            handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
+                        }
+                    }
+                }, 0, 1, TimeUnit.SECONDS);
+            } else {
+                handler.post(() -> Toast.makeText(getApplicationContext(), "Using Manual Mode", Toast.LENGTH_SHORT).show());
+                ArrayList<String> lines = new ArrayList<>();
+                // Read the whole file and store its rows into "lines" list
+                try {
+                    Scanner scanner = new Scanner(new File(file)).useDelimiter(System.lineSeparator());
+                    while (scanner.hasNextLine()) lines.add(scanner.nextLine());
+                    scanner.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
                 }
-            }, 0, 1, TimeUnit.SECONDS);
+                if (timeout == 0) {
+                    handler.post(() -> Toast.makeText(getApplicationContext(), "Timeout was not set. Default behavior will be applied", Toast.LENGTH_SHORT).show());
+                    timeout = lines.size();
+                }
+                ScheduledFuture<?> serviceHandler = service.scheduleAtFixedRate(() -> {
+                    if (lineNumber >= lines.size() || lineNumber >= timeout || stopSimulation.get()) {
+                        if (lineNumber >= lines.size()) lineNumber = 0;
+                        service.shutdownNow();
+                    } else {
+                        // Save current data to pass to main thread, or they might be updated before being consumed
+                        String currentLine = lines.get(lineNumber);
+                        // Set the publishing topic
+                        connection.setPubTopic("simulation");
+                        connection.setMessage(currentLine);
+                        // Assign job to Main thread
+                        handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
+                        lineNumber++;
+                    }
+                }, 0, 1, TimeUnit.SECONDS);
+            }
         }
 
     }
