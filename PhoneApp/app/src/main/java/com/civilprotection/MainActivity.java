@@ -525,7 +525,6 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
             mediaPlayer.stop();
             dialogInterface.dismiss();
         });
-        //mediaPlayer.release();
         builder.setOnDismissListener(dialogInterface -> {
             mediaPlayer.stop();
             dialogInterface.dismiss();
@@ -596,10 +595,13 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                     timeout = lines.size();
                 }
                 ScheduledFuture<?> serviceHandler = service.scheduleAtFixedRate(() -> {
-                    if (lineNumber >= lines.size() || lineNumber >= timeout || stopSimulation.get()) {
-                        if (lineNumber >= lines.size()) lineNumber = 0;
+                    if (lineNumber >= timeout || stopSimulation.get()) {
+                        // If we stopped due to timeout, update the stopSimulation flag
+                        stopSimulation.set(true);
                         service.shutdownNow();
                     } else {
+                        // Loop over the input file
+                        if (lineNumber >= lines.size()) lineNumber = 0;
                         // Save current data to pass to main thread, or they might be updated before being consumed
                         String currentLine = lines.get(lineNumber);
                         // Set the publishing topic
