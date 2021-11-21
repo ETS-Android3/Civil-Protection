@@ -59,9 +59,6 @@ public class Parser {
 
         try (FileWriter writer = new FileWriter(outFile)) {
 
-            // Handle first line of output file manually
-            writer.append("lat,long\n");
-
             for (int record = 0; record < nodeList.getLength(); record++) {
 
                 Node node = nodeList.item(record);
