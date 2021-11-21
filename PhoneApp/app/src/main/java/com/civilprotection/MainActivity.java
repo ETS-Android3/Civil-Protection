@@ -512,6 +512,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         vibrator.vibrate(1000);
         MediaPlayer mediaPlayer;
+        boolean dismiss = false;
         if (alertFlag) {
             // High level danger : server returns 1
             mediaPlayer = MediaPlayer.create(this, R.raw.alert_high);
@@ -521,6 +522,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         }
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.start();
+        mediaPlayer.setLooping(true);
         builder.setPositiveButton("Confirm", (dialogInterface, i) -> {
             mediaPlayer.stop();
             dialogInterface.dismiss();
