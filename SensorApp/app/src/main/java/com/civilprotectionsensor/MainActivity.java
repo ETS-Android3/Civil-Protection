@@ -38,7 +38,7 @@ import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
-import com.civilprotectionsensor.ui.SectionsPagerAdapter;
+import com.civilprotectionsensor.ui.PagerAdapter;
 
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler handler;
     private CallbackHandler.CallBackListener listener;
-    SectionsPagerAdapter adapter;
+    PagerAdapter adapter;
 
     private Connection connection;
 
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createTabs() {
-        adapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        adapter = new PagerAdapter(getSupportFragmentManager());
         if (readStringSetting("session_id").equals("-1")) {
             // If this is the first run of the app, load the default sensors
             setStringSetting("session_id", String.valueOf(new Random().nextInt(10000)));
@@ -190,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
             sensors = Utils.getJsonContent(this, sensorConfigFile, false);
         }
         ViewPager viewPager = findViewById(R.id.viewPager);
+        viewPager.setOffscreenPageLimit(sensors.size() - 1);
         TabLayout tabs = findViewById(R.id.tabs);
         int smokeCounter = 0, gasCounter = 0, tempCounter = 0, uvCounter = 0;
         for (int sensor = 0; sensor < sensors.size(); sensor++) {
@@ -559,7 +560,7 @@ public class MainActivity extends AppCompatActivity {
                         payload.append(latitude).append(";").append(longitude).append(";").append(getBatteryLevel()).append(";");
                         for (Map.Entry<Sensor, Boolean> entry : sensors.entrySet()) {
                             if (entry.getValue().toString().equals("true"))
-                                payload.append(entry.getKey().getType()).append(";");
+                                payload.append(entry.getKey().getType()).append(";").append(entry.getKey().getCurrent()).append(";");
                         }
                         connection.setPubTopic("data");
                         connection.setMessage(payload.toString().substring(0, payload.toString().length() - 1));
