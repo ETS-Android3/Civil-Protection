@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
     private String longitude = "";
     BatteryManager batteryManager;
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -523,7 +522,6 @@ public class MainActivity extends AppCompatActivity {
         getDefaultSharedPreferences(this).edit().putBoolean(key, value).apply();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private String getBatteryLevel() {
         return String.valueOf(batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
     }
@@ -544,8 +542,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class SensorRunnable implements Runnable {
-
-        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
         public void run() {
             stopRunnable.set(false);
@@ -558,10 +554,10 @@ public class MainActivity extends AppCompatActivity {
                         HashMap<Sensor, Boolean> sensors = getCurrentSensors();
                         StringBuilder payload = new StringBuilder();
                         payload.append(latitude).append(";").append(longitude).append(";").append(getBatteryLevel()).append(";");
-                        for (Map.Entry<Sensor, Boolean> entry : sensors.entrySet()) {
+                        // Only append data of currently active sensors
+                        for (Map.Entry<Sensor, Boolean> entry : sensors.entrySet())
                             if (entry.getValue().toString().equals("true"))
                                 payload.append(entry.getKey().getType()).append(";").append(entry.getKey().getCurrent()).append(";");
-                        }
                         connection.setPubTopic("data");
                         connection.setMessage(payload.toString().substring(0, payload.toString().length() - 1));
                         // Assign job to Main thread
@@ -570,7 +566,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }, 0, 1, TimeUnit.SECONDS);
         }
-
     }
 
 }
