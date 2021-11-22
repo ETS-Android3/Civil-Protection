@@ -25,7 +25,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import com.civilprotection.ui.viewmodels.FragmentViewModel;
-import com.civilprotection.ui.SectionsPagerAdapter;
+import com.civilprotection.ui.FragmentAdapter;
 import com.civilprotection.ui.fragments.FragmentData;
 import com.civilprotection.ui.fragments.FragmentPublish;
 import com.civilprotection.ui.fragments.FragmentSubscribe;
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     private void createTabs() {
         viewPager = findViewById(R.id.view_pager);
         TabLayout tabs = findViewById(R.id.tabs);
-        SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager());
         adapter.addFragment(new FragmentPublish(), getResources().getString(R.string.tab_1_title));
         adapter.addFragment(new FragmentSubscribe(), getResources().getString(R.string.tab_2_title));
         adapter.addFragment(new FragmentData(), getResources().getString(R.string.tab_3_title));
@@ -600,7 +600,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                         // Save current data to pass to main thread, or they might be updated before being consumed
                         String currentLine = lines.get(lineNumber);
                         // Set the publishing topic
-                        connection.setPubTopic("simulation");
+                        connection.setPubTopic("data");
                         connection.setMessage(currentLine);
                         // Assign job to Main thread
                         handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
