@@ -3,7 +3,7 @@ package com.civilprotectionsensor;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.civilprotectionsensor.ui.SectionsPagerAdapter;
+import com.civilprotectionsensor.ui.PagerAdapter;
 import com.civilprotectionsensor.ui.fragments.FragmentCreateGasSensor;
 import com.civilprotectionsensor.ui.fragments.FragmentCreateSmokeSensor;
 import com.civilprotectionsensor.ui.fragments.FragmentCreateTempSensor;
@@ -68,7 +68,7 @@ public class SensorCreateActivity extends AppCompatActivity
     private void createTabs() {
         ViewPager viewPager = findViewById(R.id.createSensorViewPager);
         TabLayout tabs = findViewById(R.id.createSensorTabs);
-        SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new FragmentCreateSmokeSensor(), getResources().getString(R.string.tab_smoke_title));
         adapter.addFragment(new FragmentCreateGasSensor(), getResources().getString(R.string.tab_gas_title));
         adapter.addFragment(new FragmentCreateTempSensor(), getResources().getString(R.string.tab_temp_title));
