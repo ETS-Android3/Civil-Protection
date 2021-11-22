@@ -9,12 +9,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-public class SectionsPagerAdapter extends FragmentPagerAdapter {
+public class FragmentAdapter extends FragmentPagerAdapter {
 
     private final ArrayList<Fragment> mFragmentList = new ArrayList<>();
     private final ArrayList<String> mFragmentTitles = new ArrayList<>();
 
-    public SectionsPagerAdapter(FragmentManager fm) {
+    public FragmentAdapter(FragmentManager fm) {
         super(fm);
     }
 
