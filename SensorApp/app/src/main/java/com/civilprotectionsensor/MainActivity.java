@@ -38,7 +38,7 @@ import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
-import com.civilprotectionsensor.ui.PagerAdapter;
+import com.civilprotectionsensor.ui.FragmentAdapter;
 
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Handler handler;
     private CallbackHandler.CallBackListener listener;
-    PagerAdapter adapter;
+    FragmentAdapter adapter;
 
     private Connection connection;
 
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createTabs() {
-        adapter = new PagerAdapter(getSupportFragmentManager());
+        adapter = new FragmentAdapter(getSupportFragmentManager());
         if (readStringSetting("session_id").equals("-1")) {
             // If this is the first run of the app, load the default sensors
             setStringSetting("session_id", String.valueOf(new Random().nextInt(10000)));
