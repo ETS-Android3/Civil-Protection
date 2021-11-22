@@ -1,8 +1,17 @@
-// Phones to server
+// Phones to server top-level
 civil/clients/{id}/
-// Sensors to server
+// Phone to server simulation data
+civil/clients/{id}/data
+
+// Sensors to server top-level
 civil/sensors/{id}/
-// Server to phones
+// Sensors to server simulation data
+civil/sensors/{id}/data
+
+// Server to phones top-level
 civil/server/{id}/
-// Server to sensors -- not used
+// Server to phones alert notifications
+civil/server/{id}/alert
+
+// Server to sensors top-level -- not used
 civil/server-sensors/{id}/
