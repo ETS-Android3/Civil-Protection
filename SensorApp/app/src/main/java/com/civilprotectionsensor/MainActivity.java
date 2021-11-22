@@ -180,10 +180,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void createTabs() {
         adapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        // If this is the first run of the app, load the default sensors
         if (readStringSetting("session_id").equals("-1")) {
+            // If this is the first run of the app, load the default sensors
             setStringSetting("session_id", String.valueOf(new Random().nextInt(10000)));
-            System.out.println("First time");
             sensors = Utils.getJsonContent(this, sensorConfigFile, true);
             Utils.storeJsonContent(this, sensorConfigFile, sensors);
         } else {
@@ -559,9 +558,8 @@ public class MainActivity extends AppCompatActivity {
                         StringBuilder payload = new StringBuilder();
                         payload.append(latitude).append(";").append(longitude).append(";").append(getBatteryLevel()).append(";");
                         for (Map.Entry<Sensor, Boolean> entry : sensors.entrySet()) {
-                            connection.setPubTopic("data");
                             if (entry.getValue().toString().equals("true"))
-                                payload.append(entry.getKey().getType()).append(";").append(entry.getKey().getCurrent()).append(";");
+                                payload.append(entry.getKey().getType()).append(";");
                         }
                         connection.setPubTopic("data");
                         connection.setMessage(payload.toString().substring(0, payload.toString().length() - 1));
@@ -570,7 +568,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }, 0, 1, TimeUnit.SECONDS);
-
         }
 
     }
