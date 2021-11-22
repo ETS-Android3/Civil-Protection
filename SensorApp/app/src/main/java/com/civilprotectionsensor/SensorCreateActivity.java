@@ -31,8 +31,7 @@ public class SensorCreateActivity extends AppCompatActivity
         setContentView(R.layout.activity_sensor_create);
         createTabs();
     }
-
-
+    
     @Override
     public void onCreateSmokeSensor() {
         sensorType = SENSOR_TYPES[0];
