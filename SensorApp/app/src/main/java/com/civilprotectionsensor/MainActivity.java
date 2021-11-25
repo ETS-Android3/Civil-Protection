@@ -401,20 +401,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private void setUpLocationProvider() {
-        locationProvider.getLastLocation().addOnSuccessListener(this, location -> {
-            if (location != null) {
-                latitude = String.valueOf(location.getLatitude());
-                longitude = String.valueOf(location.getLongitude());
-                gpsReady.set(true);
-                gpsPermissionGranted.set(true);
-                SensorRunnable runnable = new SensorRunnable();
-                new Thread(runnable).start();
-            }
-        });
-    }
-
     private void onConnectFailure() {
         turnOffFAB();
         System.err.println("Failed to connect to " + connection.getServerUri());
@@ -451,6 +437,20 @@ public class MainActivity extends AppCompatActivity {
         turnOnFAB();
         System.out.println("Reconnected Successfully!");
         Toast.makeText(this, "Reconnected Successfully!", Toast.LENGTH_SHORT).show();
+    }
+    
+    @SuppressLint("MissingPermission")
+    private void setUpLocationProvider() {
+        locationProvider.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                latitude = String.valueOf(location.getLatitude());
+                longitude = String.valueOf(location.getLongitude());
+                gpsReady.set(true);
+                gpsPermissionGranted.set(true);
+                SensorRunnable runnable = new SensorRunnable();
+                new Thread(runnable).start();
+            }
+        });
     }
 
     private void setUpTheme() {
