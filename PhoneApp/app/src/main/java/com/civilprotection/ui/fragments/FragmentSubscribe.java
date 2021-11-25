@@ -25,9 +25,22 @@ public class FragmentSubscribe extends Fragment implements View.OnClickListener 
         void onSubscribePressed();
     }
 
-    private OnSubscribeListener subscribeListener;
+    private OnSubscribeListener listener;
     private FragmentViewModel viewModel;
 
+    @Override
+    public void onAttach(@NotNull Context context) {
+        super.onAttach(context);
+        if (context instanceof Activity) {
+            Activity activity = (Activity) context;
+            try {
+                this.listener = (OnSubscribeListener) activity;
+            } catch (final ClassCastException e) {
+                throw new ClassCastException(activity.toString() + " must implement OnSubscribeListener");
+            }
+        }
+    }
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_subscribe, parent, false);
@@ -47,20 +60,7 @@ public class FragmentSubscribe extends Fragment implements View.OnClickListener 
     public void onClick(View v) {
         if (v.getId() == R.id.subscribeButton) {
             updateValues();
-            subscribeListener.onSubscribePressed();
-        }
-    }
-
-    @Override
-    public void onAttach(@NotNull Context context) {
-        super.onAttach(context);
-        if (context instanceof Activity) {
-            Activity activity = (Activity) context;
-            try {
-                this.subscribeListener = (OnSubscribeListener) activity;
-            } catch (final ClassCastException e) {
-                throw new ClassCastException(activity.toString() + " must implement OnSubscribeListener");
-            }
+            listener.onSubscribePressed();
         }
     }
 
