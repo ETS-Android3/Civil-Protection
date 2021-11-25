@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         if (connection.isConnected()) {
             turnOnFAB();
             try {
-                connection.setSubTopic("#");
+                connection.setSubTopic(topic);
                 connection.subscribe(connection.getSubTopic(), qos);
                 System.out.println("Successfully subscribed to " + connection.getSubTopic());
                 Toast.makeText(this, "Subscribed to " + topic, Toast.LENGTH_SHORT).show();
@@ -369,24 +369,12 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         Toast.makeText(this, "Stopping simulation", Toast.LENGTH_SHORT).show();
     }
 
-    @SuppressLint("MissingPermission")
-    private void setUpLocationProvider() {
-        locationProvider.getLastLocation().addOnSuccessListener(this, location -> {
-            if (location != null) {
-                latitude = String.valueOf(location.getLatitude());
-                longitude = String.valueOf(location.getLongitude());
-                gpsReady.set(true);
-                gpsPermissionGranted.set(true);
-                SimulationRunnable runnable = new SimulationRunnable(simulationFilePath, connection.getMaxSimulationTime());
-                new Thread(runnable).start();
-            }
-        });
-    }
-
     private void onConnectSuccess() {
         turnOnFAB();
         System.out.println("Successfully connected to " + connection.getServerUri());
         Toast.makeText(this, "Connected to " + connection.getServerIp(), Toast.LENGTH_SHORT).show();
+        // Subscribe by default to all possible alert topics the server might publish to
+        subscribe("alerts/#", 2);
     }
 
     private void onConnectFailure() {
@@ -426,6 +414,20 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         turnOnFAB();
         System.out.println("Reconnected Successfully!");
         Toast.makeText(this, "Reconnected Successfully!", Toast.LENGTH_SHORT).show();
+    }
+
+    @SuppressLint("MissingPermission")
+    private void setUpLocationProvider() {
+        locationProvider.getLastLocation().addOnSuccessListener(this, location -> {
+            if (location != null) {
+                latitude = String.valueOf(location.getLatitude());
+                longitude = String.valueOf(location.getLongitude());
+                gpsReady.set(true);
+                gpsPermissionGranted.set(true);
+                SimulationRunnable runnable = new SimulationRunnable(simulationFilePath, connection.getMaxSimulationTime());
+                new Thread(runnable).start();
+            }
+        });
     }
 
     private void setUpTheme() {
