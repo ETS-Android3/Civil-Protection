@@ -11,7 +11,7 @@ civil/sensors/{id}/data
 // Server to phones top-level
 civil/server/{id}/
 // Server to phones alert notifications
-civil/server/{id}/alert
+civil/server/{id}/alerts
 
 // Server to sensors top-level -- not used
 civil/server-sensors/{id}/
