@@ -569,7 +569,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                     } else {
                         if (gpsPermissionGranted.get() && gpsReady.get()) {
                             // Set the publishing topic
-                            connection.setPubTopic("simulation");
+                            connection.setPubTopic("data");
                             connection.setMessage(latitude + ";" + longitude);
                             // Assign job to Main thread
                             handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
