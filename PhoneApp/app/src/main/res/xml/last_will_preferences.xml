@@ -4,14 +4,14 @@
 
     <EditTextPreference
         android:key="last_will_topic"
-        app:defaultValue=""
+        app:defaultValue="@string/empty"
         app:icon="@drawable/ic_topic"
         app:title="@string/last_will_topic"
         app:useSimpleSummaryProvider="true" />
 
     <EditTextPreference
         android:key="last_will_payload"
-        app:defaultValue=""
+        app:defaultValue="@string/empty"
         app:icon="@drawable/ic_keyboard"
         app:title="@string/last_will_payload"
         app:useSimpleSummaryProvider="true" />
