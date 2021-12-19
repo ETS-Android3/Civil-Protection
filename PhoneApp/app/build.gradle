@@ -49,9 +49,6 @@ dependencies {
     // File picker
     implementation 'com.nbsp:materialfilepicker:1.9.1'
 
-    // JSON helper
-    implementation 'com.google.code.gson:gson:2.8.6'
-
     // Location Provider
     implementation 'com.google.android.gms:play-services-location:18.0.0'
 
