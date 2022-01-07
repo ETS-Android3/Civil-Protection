@@ -58,9 +58,7 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
                     sessionId = Integer.parseInt(readStringSetting(key));
                 } else {
                     setStringSetting(key, String.valueOf(sessionId));
-                    finish();
-                    startActivity(new Intent(this, com.civilprotection.SettingsActivity.class));
-                    overridePendingTransition(0, 0);
+                    refreshUI();
                     Toast.makeText(this, "Please provide a numeric ID", Toast.LENGTH_LONG).show();
                 }
                 break;
@@ -92,9 +90,7 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
                 // Add desired handling
                 break;
             case "server_ip":
-                finish();
-                startActivity(new Intent(this, com.civilprotection.SettingsActivity.class));
-                overridePendingTransition(0, 0);
+                refreshUI();
                 break;
             case "use_auth":
                 // Add desired handling
@@ -102,9 +98,7 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
             case "server_port":
                 if (!isNumeric(readStringSetting(key))) {
                     setStringSetting(key, String.valueOf(1883));
-                    finish();
-                    startActivity(new Intent(this, com.civilprotection.SettingsActivity.class));
-                    overridePendingTransition(0, 0);
+                    refreshUI();
                     Toast.makeText(this, "Port number must be an integer", Toast.LENGTH_LONG).show();
                 } else {
                     // Add desired handling
@@ -221,6 +215,12 @@ public class SettingsActivity extends AppCompatActivity implements SharedPrefere
 
     private boolean isNumeric(String str) {
         return str.matches("-?\\d+(\\.\\d+)?");
+    }
+
+    private void refreshUI() {
+        finish();
+        startActivity(new Intent(this, com.civilprotection.SettingsActivity.class));
+        overridePendingTransition(0, 0);
     }
 
 }
