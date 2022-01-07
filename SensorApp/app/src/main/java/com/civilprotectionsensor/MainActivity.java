@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.os.BatteryManager;
-import android.os.Build;
 import android.os.Bundle;
 
 import com.civilprotectionsensor.ui.fragments.FragmentUvSensor;
@@ -20,7 +19,6 @@ import com.google.android.material.slider.Slider;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
