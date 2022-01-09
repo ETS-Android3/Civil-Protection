@@ -21,7 +21,7 @@
     <!-- Root Preferences -->
     <string name="session_id">Session ID</string>
     <string name="edit_text_server_ip">Server IP Address</string>
-    <string name="defaultServerIp">192.168.1.22</string>
+    <string name="defaultServerIp">192.168.1.2</string>
     <string name="edit_text_server_port">Server Port</string>
     <string name="defaultServerPort">1883</string>
     <string name="qos_level">QoS level</string>
