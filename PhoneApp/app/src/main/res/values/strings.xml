@@ -58,7 +58,7 @@
     <string name="retainedTextView">Retain</string>
 
     <string name="simulationTimeOut">Simulation Time</string>
-    <string name="simulationDefaultTimeOut">10</string>
+    <string name="simulationDefaultTimeOut"></string>
     <string name="simulationFileTextView">Simulation file:</string>
     <string name="simulationFileButton">Select file</string>
     <string name="simulationPathTextView">Not selected</string>

@@ -43,7 +43,7 @@ public class Connection extends MqttAsyncClient {
     private String message = "";
     private boolean retain = false;
     private boolean autoMode = false;
-    private int maxSimulationTime = 10;
+    private int maxSimulationTime = 0;
 
     public Connection(String serverURI, String sessionId, MemoryPersistence persistence, Context context, com.civilprotection.CallbackHandler.CallBackListener listener) throws MqttException {
         super(serverURI, sessionId, persistence);
