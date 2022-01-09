@@ -549,11 +549,13 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
         String file;
         String line;
         int timeout;
+        int localLineNum;
 
         SimulationRunnable(String file, int timeout) {
             this.file = file;
             this.line = "";
             this.timeout = timeout;
+            localLineNum = 0;
         }
 
         @Override
@@ -592,11 +594,13 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                     timeout = lines.size();
                 }
                 ScheduledFuture<?> serviceHandler = service.scheduleAtFixedRate(() -> {
-                    if (lineNumber >= timeout || stopSimulation.get()) {
+                    if (localLineNum >= timeout || stopSimulation.get()) {
                         // If we stopped due to timeout, update the stopSimulation flag
                         stopSimulation.set(true);
                         service.shutdownNow();
                     } else {
+                        System.out.println("Timeout is " + connection.getMaxSimulationTime());
+
                         // Loop over the input file
                         if (lineNumber >= lines.size()) lineNumber = 0;
                         // Save current data to pass to main thread, or they might be updated before being consumed
@@ -606,6 +610,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                         connection.setMessage(currentLine);
                         // Assign job to Main thread
                         handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
+                        localLineNum++;
                         lineNumber++;
                     }
                 }, 0, 1, TimeUnit.SECONDS);
