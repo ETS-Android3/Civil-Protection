@@ -356,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                     }
                 }
             } else {
-                Toast.makeText(this, "You need to wait until the previous simulation ends to press the Start Button again!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "You need to wait until the previous simulation ends to press the a new one!", Toast.LENGTH_LONG).show();
             }
         } else {
             Toast.makeText(this, "You need to connect first!", Toast.LENGTH_SHORT).show();
@@ -365,8 +365,10 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
 
     @Override
     public void onStopPressed() {
-        stopSimulation.set(true);
-        Toast.makeText(this, "Stopping simulation", Toast.LENGTH_SHORT).show();
+        if (!stopSimulation.get()) {
+            stopSimulation.set(true);
+            Toast.makeText(this, "Stopping simulation", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void onConnectSuccess() {
