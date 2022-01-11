@@ -1,4 +1,4 @@
-package com.uoa.server;
+package com.uoa.server.handleinput;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -17,7 +17,7 @@ import java.nio.file.Files;
 // Simple XML to CSV parser
 public class Parser {
 
-    Parser(String fileName) {
+    public Parser(String fileName) {
         File inputDir = new File("inputFiles");
         File outputDir = new File("outputFiles");
         File file = new File(inputDir + "/" + fileName);
