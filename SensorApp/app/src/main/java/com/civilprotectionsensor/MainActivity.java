@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 refreshUi();
                 return true;
             case R.id.exitMenu:
-                Utils.storeJsonContent(this, sensorConfigFile, sensors);
+                Utils.putJsonContent(this, sensorConfigFile, sensors);
                 showExitDialog();
                 return true;
         }
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
             // If this is the first run of the app, load the default sensors
             setStringSetting("session_id", String.valueOf(new Random().nextInt(10000)));
             sensors = Utils.getJsonContent(this, sensorConfigFile, true);
-            Utils.storeJsonContent(this, sensorConfigFile, sensors);
+            Utils.putJsonContent(this, sensorConfigFile, sensors);
         } else {
             // Otherwise load the sensors the app has stored
             sensors = Utils.getJsonContent(this, sensorConfigFile, false);
@@ -484,7 +484,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void refreshUi() {
-        Utils.storeJsonContent(this, sensorConfigFile, sensors);
+        Utils.putJsonContent(this, sensorConfigFile, sensors);
         finish();
         startActivity(getIntent());
         overridePendingTransition(0, 0);

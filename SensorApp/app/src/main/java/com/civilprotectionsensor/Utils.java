@@ -62,7 +62,7 @@ public class Utils {
         return gson.fromJson(sb.toString(), sensorListType);
     }
 
-    public static void storeJsonContent(Context context, String file, List<Sensor> sensors) {
+    public static void putJsonContent(Context context, String file, List<Sensor> sensors) {
         FileOutputStream fos = null;
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
