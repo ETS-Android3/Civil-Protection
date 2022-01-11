@@ -53,7 +53,7 @@ public class ServerApplication {
             try {
                 double lat = Double.parseDouble(splitMessage[0]);
                 double lng = Double.parseDouble(splitMessage[1]);
-                androidDevices.add(new AndroidDevice(deviceId, lat, lng));
+                androidDevices.add(new AndroidDevice(deviceId, lat, lng, System.currentTimeMillis() / 1000));
             } catch (NumberFormatException exception) {
                 System.err.println("Error parsing android device. Miss-formatted data. Double parsing failed.");
             }
@@ -70,7 +70,7 @@ public class ServerApplication {
                 double lat = Double.parseDouble(deviceInfo[0]);
                 double lng = Double.parseDouble(deviceInfo[1]);
                 double battery = Double.parseDouble(deviceInfo[2]);
-                IoTDevice iotDevice = new IoTDevice(deviceId, lat, lng, battery);
+                IoTDevice iotDevice = new IoTDevice(deviceId, lat, lng, battery, System.currentTimeMillis() / 1000);
                 // These flags indicates if this IoT device has multiple sensors of the same type
                 boolean extraSmoke = false, extraGas = false, extraTemp = false, extraUv = false;
                 // sValue holds either the sensor value or the medium of the same-type sensors' values

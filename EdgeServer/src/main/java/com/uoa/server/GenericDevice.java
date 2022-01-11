@@ -13,6 +13,7 @@ public class GenericDevice {
     private Integer device_id;
     private Double lat;
     private Double lng;
+    private long lastUpdate;
 
     public GenericDevice(){}
 
@@ -20,10 +21,11 @@ public class GenericDevice {
         this.device_id = device_id;
     }
 
-    public GenericDevice(Integer device_id, Double lat, Double lng) {
+    public GenericDevice(Integer device_id, Double lat, Double lng, long lastUpdate) {
         this.device_id = device_id;
         this.lat = lat;
         this.lng = lng;
+        this.lastUpdate = lastUpdate;
     }
 
     public Integer getDevice_id() {
@@ -48,6 +50,14 @@ public class GenericDevice {
 
     public void setLng(Double lng) {
         this.lng = lng;
+    }
+
+    public long getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(long lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
 }

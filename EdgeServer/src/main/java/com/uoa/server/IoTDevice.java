@@ -32,8 +32,8 @@ public class IoTDevice extends GenericDevice {
         super(device_id);
     }
 
-    public IoTDevice(Integer device_id, Double lat, Double lng, Double battery_level) {
-        super(device_id, lat, lng);
+    public IoTDevice(Integer device_id, Double lat, Double lng, Double battery_level, long update) {
+        super(device_id, lat, lng, update);
         this.battery_level = battery_level;
     }
 

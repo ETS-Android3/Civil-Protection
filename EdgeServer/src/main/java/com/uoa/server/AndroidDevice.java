@@ -6,8 +6,8 @@ public class AndroidDevice extends GenericDevice {
         super();
     }
 
-    public AndroidDevice(Integer device_id, Double lat, Double lng) {
-        super(device_id, lat, lng);
+    public AndroidDevice(Integer device_id, Double lat, Double lng, long update) {
+        super(device_id, lat, lng, update);
     }
 
     public AndroidDevice(Integer device_id) {
