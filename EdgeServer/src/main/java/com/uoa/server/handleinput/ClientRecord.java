@@ -1,4 +1,4 @@
-package com.uoa.server;
+package com.uoa.server.handleinput;
 
 public class ClientRecord {
 
