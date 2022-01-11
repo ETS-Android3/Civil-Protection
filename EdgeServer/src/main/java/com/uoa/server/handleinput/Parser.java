@@ -1,4 +1,4 @@
-package com.uoa.backend;
+package com.uoa.server;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -16,6 +16,23 @@ import java.nio.file.Files;
 
 // Simple XML to CSV parser
 public class Parser {
+
+    Parser(String fileName) {
+        File inputDir = new File("inputFiles");
+        File outputDir = new File("outputFiles");
+        File file = new File(inputDir + "/" + fileName);
+
+        if (!file.exists()) System.out.println("Cannot find input files. Aborting...");
+
+        if (!outputDir.exists())
+            if (!outputDir.mkdir()) System.out.println("Could not create output directory");
+
+        try {
+            parseXmlToCsv(inputDir + "/" + fileName);
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+    }
 
     private static String initFile(String filePath) {
         String fileType = null;
@@ -37,7 +54,7 @@ public class Parser {
     }
 
     // Converts $inFile from XML to CSV format
-    public static void parseXmlToCsv(String inFile) throws ParserConfigurationException {
+    private static void parseXmlToCsv(String inFile) throws ParserConfigurationException {
 
         String outFile = initFile(inFile);
 

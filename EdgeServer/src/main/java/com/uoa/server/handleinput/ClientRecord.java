@@ -1,4 +1,4 @@
-package com.uoa.backend;
+package com.uoa.server;
 
 public class ClientRecord {
 
