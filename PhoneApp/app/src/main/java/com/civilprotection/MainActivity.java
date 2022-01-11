@@ -133,9 +133,6 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                 // Restore the session ID
                 setStringSetting("session_id", String.valueOf(sessionId));
                 return true;
-            case R.id.showAlertMenu:
-                showAlertDialog(true, "You are in danger!");
-                return true;
             case R.id.exitMenu:
                 showExitDialog();
                 return true;
@@ -400,10 +397,15 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
     }
 
     private void handleMessageArrived(String topic, MqttMessage message) {
-        // Parse topic to find out what type of danger it is
-        showAlertDialog(true, "You are in danger!");
-        System.out.println("Received " + message + " in " + topic);
-        Toast.makeText(connection.getContext(), "Received " + message + " in " + topic, Toast.LENGTH_SHORT).show();
+        String topicInfo [] = topic.split("/");
+        if (topicInfo[3].compareTo("alerts") == 0) {
+            String msgInfo[] = message.toString().split(";");
+            // Parse the message to find out what type of danger it is
+            showAlertDialog(msgInfo[0].compareTo("true") == 0, Double.parseDouble(msgInfo[1]), msgInfo[2]);
+            System.out.println("Received " + message + " in " + topic);
+        } else {
+            Toast.makeText(connection.getContext(), "Received " + message + " in " + topic, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void handleConnectionLost() {
@@ -508,15 +510,15 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
             .start();
     }
 
-    private void showAlertDialog(boolean alertFlag, String message) {
+    private void showAlertDialog(boolean dangerHigh, double distance, String message) {
         AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(this);
-        builder.setTitle("Alert");
+        builder.setTitle("Caution! Possible danger " + distance + " km from you!");
         builder.setMessage(message);
         Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         vibrator.vibrate(1000);
         MediaPlayer mediaPlayer;
-        mediaPlayer = MediaPlayer.create(this, alertFlag ? R.raw.alert_high : R.raw.alert);
+        mediaPlayer = MediaPlayer.create(this, dangerHigh ? R.raw.alert_high : R.raw.alert);
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.start();
         mediaPlayer.setLooping(true);
@@ -574,7 +576,7 @@ public class MainActivity extends AppCompatActivity implements FragmentPublish.O
                         if (gpsPermissionGranted.get() && gpsReady.get()) {
                             // Set the publishing topic
                             connection.setPubTopic("data");
-                            connection.setMessage(latitude + ";" + longitude);
+                            connection.setMessage(latitude + "," + longitude);
                             // Assign job to Main thread
                             handler.post(() -> publish(connection.getPubTopic(), connection.getMessage(), connection.getQos(), connection.isRetain()));
                         }
