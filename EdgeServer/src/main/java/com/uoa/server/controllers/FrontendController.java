@@ -1,7 +1,10 @@
-package com.uoa.server;
+package com.uoa.server.controllers;
 
-import com.uoa.server.registry.EventEntry;
-import com.uoa.server.registry.EventEntryService;
+import com.uoa.server.DevicesJSONResponse;
+import com.uoa.server.IoTDevice;
+import com.uoa.server.ServerApplication;
+import com.uoa.server.models.EventModel;
+import com.uoa.server.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -10,7 +13,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class FrontendController {
 
     @Autowired
-    EventEntryService eventEntryService;
+    EventService eventService;
 
     @GetMapping("/")
     public ModelAndView index () {
@@ -37,9 +40,9 @@ public class FrontendController {
     }
 
     @GetMapping("/api/events/add")
-    public EventEntry addEvent () {
-        EventEntry eventEntry = new EventEntry("30/05/11 21:00:00", 31.2, 45.4, IoTDevice.DANGER_LEVEL_HIGH, null, null, null, null, null);
-        return eventEntryService.save(eventEntry);
+    public EventModel addEvent () {
+        EventModel eventModel = new EventModel("30/05/11 21:00:00", 31.2, 45.4, IoTDevice.DANGER_LEVEL_HIGH, null, null, null, null, null);
+        return eventService.save(eventModel);
     }
 
 }
