@@ -2,8 +2,8 @@ package com.uoa.server;
 
 import com.uoa.server.connection.MqttConnection;
 import com.uoa.server.handleinput.Parser;
-import com.uoa.server.registry.EventEntry;
-import com.uoa.server.registry.EventEntryService;
+import com.uoa.server.models.EventModel;
+import com.uoa.server.services.EventService;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -22,13 +22,13 @@ public class ServerApplication {
     private static final Parser inputFile2 = new Parser("android_2.xml");
     public static DevicesList androidDevices = new DevicesList();
     public static DevicesList iotDevices = new DevicesList();
-    private static EventEntryService eventEntryService;
+    private static EventService eventService;
     public static final int coolDown = 30000; // 30s coolDown
     public HashMap<String, Long> coolDownMap = new HashMap<>();
 
     public static void main(String[] args) {
         ApplicationContext applicationContext = SpringApplication.run(ServerApplication.class, args);
-        eventEntryService = applicationContext.getBean(EventEntryService.class);
+        eventService = applicationContext.getBean(EventService.class);
     }
 
     public void onMessageArrived(String topic, MqttMessage message) {
@@ -71,7 +71,7 @@ public class ServerApplication {
                 double lng = Double.parseDouble(deviceInfo[1]);
                 double battery = Double.parseDouble(deviceInfo[2]);
                 IoTDevice iotDevice = new IoTDevice(deviceId, lat, lng, battery, System.currentTimeMillis() / 1000);
-                // These flags indicates if this IoT device has multiple sensors of the same type
+                // These flags indicate if this IoT device has multiple sensors of the same type
                 boolean extraSmoke = false, extraGas = false, extraTemp = false, extraUv = false;
                 // sValue holds either the sensor value or the medium of the same-type sensors' values
                 double sValue;
@@ -121,7 +121,7 @@ public class ServerApplication {
                 if (iotDevice.eventDetection() != 0) {
                     boolean alertHigh = false;
                     String alertMsg = null;
-                    EventEntry eventEntry;
+                    EventModel eventModel;
                     switch (iotDevice.eventDetection()) {
                         case 1:
                             alertMsg = IoTDevice.dangerMsg[0];
@@ -148,10 +148,10 @@ public class ServerApplication {
                     if (isOnCoolDown(iotDevice.getDevice_id(), iotDevice.getLat(), iotDevice.getLng(), alertMsg)) {
                         System.out.println("Detected event that is on cool-down!");
                     } else {
-                        eventEntry = new EventEntry(getCurrentTimeStamp(), iotDevice.getLat(), iotDevice.getLng(),
+                        eventModel = new EventModel(getCurrentTimeStamp(), iotDevice.getLat(), iotDevice.getLng(),
                             alertHigh ? IoTDevice.DANGER_LEVEL_HIGH : IoTDevice.DANGER_LEVEL_MEDIUM,
                             iotDevice.getSmoke(), iotDevice.getGas(), iotDevice.getTemp(), iotDevice.getUv(), alertMsg);
-                        eventEntryService.save(eventEntry);
+                        eventService.save(eventModel);
                         notifyAndroidDevices(iotDevice.getLat(), iotDevice.getLng(), alertHigh, alertMsg);
                     }
                 }
