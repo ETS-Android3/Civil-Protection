@@ -1,10 +1,10 @@
-package com.uoa.server.registry;
+package com.uoa.server.models;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "event")
-public class EventEntry {
+public class EventModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -19,9 +19,9 @@ public class EventEntry {
     private Double uv;
     private String message;
 
-    public EventEntry() {}
+    public EventModel() {}
 
-    public EventEntry(String timestamp, Double lat, Double lng, String severity_level, Double smoke, Double gas, Double temperature, Double uv, String message) {
+    public EventModel(String timestamp, Double lat, Double lng, String severity_level, Double smoke, Double gas, Double temperature, Double uv, String message) {
         this.timestamp = timestamp;
         this.lat = lat;
         this.lng = lng;

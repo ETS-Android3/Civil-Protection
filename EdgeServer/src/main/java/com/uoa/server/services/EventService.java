@@ -1,21 +1,23 @@
-package com.uoa.server.registry;
+package com.uoa.server.services;
 
+import com.uoa.server.models.EventModel;
+import com.uoa.server.repositories.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class EventEntryService {
+public class EventService {
 
     @Autowired
-    EventEntryRepository repository;
+    EventRepository repository;
 
-    public EventEntry save(EventEntry eventEntry) {
-        return repository.save(eventEntry);
+    public EventModel save(EventModel eventModel) {
+        return repository.save(eventModel);
     }
 
-    public List<EventEntry> findAll() {
+    public List<EventModel> findAll() {
         return repository.findAll();
     }
 
