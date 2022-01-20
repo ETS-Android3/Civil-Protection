@@ -9,6 +9,7 @@ public class EventModel {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
+    private Integer devId;
     private Double lat;
     private Double lng;
     private String timestamp;
@@ -21,8 +22,9 @@ public class EventModel {
 
     public EventModel() {}
 
-    public EventModel(String timestamp, Double lat, Double lng, String severity_level, Double smoke, Double gas, Double temperature, Double uv, String message) {
+    public EventModel(String timestamp, Integer devId, Double lat, Double lng, String severity_level, Double smoke, Double gas, Double temperature, Double uv, String message) {
         this.timestamp = timestamp;
+        this.devId = devId;
         this.lat = lat;
         this.lng = lng;
         this.severity_level = severity_level;
@@ -35,6 +37,10 @@ public class EventModel {
 
     public Integer getId() {
         return id;
+    }
+
+    public Integer getDevId() {
+        return devId;
     }
 
     public String getTimestamp() {
