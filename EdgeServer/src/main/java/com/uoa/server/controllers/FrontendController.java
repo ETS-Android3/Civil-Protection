@@ -1,7 +1,6 @@
 package com.uoa.server.controllers;
 
 import com.uoa.server.DevicesJSONResponse;
-import com.uoa.server.IoTDevice;
 import com.uoa.server.ServerApplication;
 import com.uoa.server.models.EventModel;
 import com.uoa.server.services.EventService;
@@ -40,8 +39,7 @@ public class FrontendController {
     }
 
     @GetMapping("/api/events/add")
-    public EventModel addEvent () {
-        EventModel eventModel = new EventModel("30/05/11 21:00:00", 31.2, 45.4, IoTDevice.DANGER_LEVEL_HIGH, null, null, null, null, null);
+    public EventModel addEvent (EventModel eventModel) {
         return eventService.save(eventModel);
     }
 
