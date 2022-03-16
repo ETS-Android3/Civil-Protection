@@ -93,14 +93,6 @@ public class IoTDevice extends GenericDevice {
         return this.getUv() != null && this.getUv() > uvLimit;
     }
 
-    public String getDangerLevel() {
-        int dangerCode = eventDetection();
-        String dangerLevel = "NONE";
-        if (dangerCode == 2) dangerLevel = IoTDevice.DANGER_LEVEL_MEDIUM;
-        else if (dangerCode != 0) dangerLevel = IoTDevice.DANGER_LEVEL_HIGH;
-        return dangerLevel;
-    }
-
     // Returns 0 if no danger is detected or 1-4 for each danger scenario
     public int eventDetection() {
         if (smokeInDanger() && gasInDanger() && tempInDanger() && uvInDanger()) return 4;
@@ -108,6 +100,14 @@ public class IoTDevice extends GenericDevice {
         else if (!smokeInDanger() && !gasInDanger() && tempInDanger() && uvInDanger()) return 2;
         else if (smokeInDanger() && gasInDanger()) return 1;
         else return 0;
+    }
+
+    public String getDangerLevel() {
+        int dangerCode = eventDetection();
+        String dangerLevel = "NONE";
+        if (dangerCode == 2) dangerLevel = IoTDevice.DANGER_LEVEL_MEDIUM;
+        else if (dangerCode != 0) dangerLevel = IoTDevice.DANGER_LEVEL_HIGH;
+        return dangerLevel;
     }
 
     public String getEventMessage() {

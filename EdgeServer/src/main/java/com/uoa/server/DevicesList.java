@@ -38,9 +38,4 @@ public class DevicesList {
         return this.devicesList.get(index);
     }
 
-    public void print() {
-        for (GenericDevice genericDevice : devicesList)
-            System.out.println(genericDevice);
-    }
-
 }

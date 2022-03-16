@@ -37,7 +37,7 @@ public class MqttConnection {
             System.out.println("Successfully connected to broker!");
         } catch (MqttException e) {
             e.printStackTrace();
-            System.out.println("Failed to connect to broker!");
+            System.err.println("Failed to connect to broker!");
         }
         return client;
     }
@@ -48,11 +48,11 @@ public class MqttConnection {
                 client.subscribe(topic, 2);
                 System.out.println("Subscribed to " + topic);
             } catch (MqttException e) {
-                System.out.println("Failed to subscribe to " + topic);
+                System.err.println("Failed to subscribe to " + topic);
                 e.getMessage();
             }
         } else {
-            System.out.println("No connection!");
+            System.err.println("No connection established!");
         }
     }
 
@@ -66,10 +66,10 @@ public class MqttConnection {
                 System.out.println("Published \"" + message + "\" to " + fixedTopic);
             } catch (MqttException e) {
                 e.printStackTrace();
-                System.out.println("Failed to publish to " + fixedTopic);
+                System.err.println("Failed to publish to " + fixedTopic);
             }
         } else {
-            System.out.println("No connection!");
+            System.err.println("No connection established!");
         }
     }
 

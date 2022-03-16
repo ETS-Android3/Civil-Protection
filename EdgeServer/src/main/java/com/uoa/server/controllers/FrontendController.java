@@ -2,10 +2,11 @@ package com.uoa.server.controllers;
 
 import com.uoa.server.DevicesJSONResponse;
 import com.uoa.server.ServerApplication;
-import com.uoa.server.models.EventModel;
 import com.uoa.server.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 @RestController
@@ -31,16 +32,10 @@ public class FrontendController {
     @CrossOrigin(origins = "http://localhost:5500/")
     @GetMapping("/api/devices/")
     public DevicesJSONResponse getAllDevices () {
-        DevicesJSONResponse response = new DevicesJSONResponse();
-        response.setAndroidDevicesList(ServerApplication.androidDevices.devicesList);
-        response.setIotDevicesList(ServerApplication.iotDevices.devicesList);
-        response.setStatus("success");
-        return response;
-    }
-
-    @GetMapping("/api/events/add")
-    public EventModel addEvent (EventModel eventModel) {
-        return eventService.save(eventModel);
+        return new DevicesJSONResponse(
+                ServerApplication.androidDevices.devicesList,
+                ServerApplication.iotDevices.devicesList,
+                "SUCCESS");
     }
 
 }

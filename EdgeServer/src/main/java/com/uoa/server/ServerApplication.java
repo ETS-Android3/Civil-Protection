@@ -1,7 +1,6 @@
 package com.uoa.server;
 
 import com.uoa.server.connection.MqttConnection;
-import com.uoa.server.handleinput.Parser;
 import com.uoa.server.models.EventModel;
 import com.uoa.server.services.EventService;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -21,8 +20,6 @@ import java.util.HashMap;
 public class ServerApplication {
 
     private static final MqttConnection connection = new MqttConnection();
-    private static final Parser inputFile1 = new Parser("android_1.xml");
-    private static final Parser inputFile2 = new Parser("android_2.xml");
     public static DevicesList androidDevices = new DevicesList();
     public static DevicesList iotDevices = new DevicesList();
     private static EventService eventService;
@@ -46,7 +43,7 @@ public class ServerApplication {
             } else if (topicType.compareTo("sensors") == 0) {
                 parseIoTDevice(deviceId, message);
             } else {
-                System.out.println("Unknown device type detected");
+                System.err.println("Unknown device type detected");
             }
         }
     }
