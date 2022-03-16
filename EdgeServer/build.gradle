@@ -5,8 +5,9 @@ plugins {
 }
 
 group = 'com.uoa'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
 	mavenCentral()
@@ -21,6 +22,13 @@ dependencies {
 	runtimeOnly 'mysql:mysql-connector-java'
 	// MQTT library
 	implementation "org.springframework.integration:spring-integration-mqtt:5.5.5"
+}
+
+jar {
+	manifest.attributes['Main-Class'] = 'com.uoa.server.ServerApplication'
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
 }
 
 test {
