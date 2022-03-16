@@ -1,6 +1,7 @@
 var map;
 var devices = {};
 var rectangle = null;
+var timeOut = 30;
 document.addEventListener("DOMContentLoaded", function () {
 	getDevices();
 });
@@ -21,14 +22,13 @@ function initMap() {
 
 function getDevices() {
 
-	axios
-		.get("http://localhost:8080/api/devices/")
+	axios.get("http://localhost:8080/api/devices/")
 		.then(function (response) {
 			populateMarkers(response.data);
 		})
 		.catch(function (error) {
-			console.error('Something went wrong!');
-			console.error('Trying again in 10 seconds...');
+			console.error(error.message);
+			console.error('Something went wrong!\nTrying again in 10 seconds...');
 			setTimeout(getDevices, 10 * 1000);
 		})
 
@@ -36,60 +36,23 @@ function getDevices() {
 
 function populateMarkers(devicesData) {
 
-	devicesData.androidDevicesList.forEach(function (androidDevice) {
-		addAndroidDeviceMarker(androidDevice);
-	});
+	devicesData.androidDevicesList.forEach(function (androidDevice) { addAndroidDeviceMarker(androidDevice); });
+	devicesData.iotDevicesList.forEach(function (iotDevice) { addIotDeviceMarker(iotDevice) });
 
-	devicesData.iotDevicesList.forEach(function (iotDevice) {
-		addSensorMarker(iotDevice)
-	});
-
-	// Check if there is an event from 2 sensors at the same time
-	if (devicesData.iotDevicesList.length === 2 &&
-	    devicesData.iotDevicesList[0].dangerLevel !== 'NONE' &&
-        devicesData.iotDevicesList[1].dangerLevel !== 'NONE') {
-		drawRectangle(devicesData.iotDevicesList);
-	} else {
-		clearRectangle();
+	// Check if there 2 active events from 2 different sensors (aka in the last $timeOut seconds)
+	clearRectangle();
+	if (devicesData.iotDevicesList.length >= 2) {
+		let event1 = false, event2 = false;
+		for (s1 = 0; s1 < devicesData.iotDevicesList.length; s1++)
+			if (moment().diff(devicesData.iotDevicesList[s1].lastUpdate * 1000, 'seconds') <= timeOut &&
+				devicesData.iotDevicesList[s1].dangerLevel !== 'NONE') { event1 = true; break; }
+		for (s2 = 0; s2 < devicesData.iotDevicesList.length; s2++)
+			if (moment().diff(devicesData.iotDevicesList[s2].lastUpdate * 1000, 'seconds') <= timeOut &&
+				s1 != s2 && devicesData.iotDevicesList[s2].dangerLevel !== 'NONE') { event2 = true; break; }
+		if (event1 && event2) drawRectangle(devicesData.iotDevicesList[s1], devicesData.iotDevicesList[s2]);
 	}
 
-	setTimeout(() => {
-		getDevices();
-	}, 1 * 1000);
-
-}
-
-function addSensorMarker(iotDevice) {
-
-    // If device already exists, update marker position, icon and info window content
-    if (devices[iotDevice.device_id]) {
-		updateSensorDeviceMarker(iotDevice);
-	} else {
-		const marker = new google.maps.Marker({map: map});
-		const infoWindow = new google.maps.InfoWindow({anchor: marker});
-		const rangeMarker = new google.maps.Marker({
-			optimized: false,
-			map: map
-		});
-
-		devices[iotDevice.device_id] = {
-			'device': iotDevice,
-			'deviceType': 'sensor-device',
-			'marker': marker,
-			'iw': infoWindow,
-			'range': rangeMarker,
-		};
-
-		rangeMarker.addListener("click", () => {
-			toggleInfoWindow(iotDevice.device_id);
-		});
-
-		marker.addListener("click", () => {
-			toggleInfoWindow(iotDevice.device_id);
-		});
-
-		updateSensorDeviceMarker(iotDevice);
-	}
+	setTimeout(() => { getDevices(); }, 1 * 1000);
 
 }
 
@@ -109,39 +72,78 @@ function addAndroidDeviceMarker(androidDevice) {
 			'iw': infoWindow,
 		};
 
-		marker.addListener("click", () => {
-			toggleInfoWindow(androidDevice.device_id);
-		});
-
+		marker.addListener("click", () => { toggleInfoWindow(androidDevice.device_id); });
 		updateAndroidDeviceMarker(androidDevice);
 	}
 
 }
 
-function updateSensorDeviceMarker(iotDevice) {
+function addIotDeviceMarker(device) {
 
-	let markerIconUrl = '/images/iot-device-icon.svg'
-	if (iotDevice.dangerLevel == 'DANGER_LEVEL_MEDIUM') {
-		markerIconUrl = '/images/iot-medium-danger-icon.svg';
-	} else if (iotDevice.dangerLevel == 'DANGER_LEVEL_HIGH') {
-		markerIconUrl = '/images/iot-high-danger-icon.svg';
+    // If device already exists, update marker position, icon and info window content
+    if (devices[device.device_id]) {
+		updateIotDeviceMarker(device);
+	} else {
+		const marker = new google.maps.Marker({map: map});
+		const infoWindow = new google.maps.InfoWindow({anchor: marker});
+		const rangeMarker = new google.maps.Marker({
+			optimized: false,
+			map: map
+		});
+
+		devices[device.device_id] = {
+			'device': device,
+			'deviceType': 'sensor-device',
+			'marker': marker,
+			'iw': infoWindow,
+			'range': rangeMarker,
+		};
+
+		rangeMarker.addListener("click", () => { toggleInfoWindow(device.device_id); });
+		marker.addListener("click", () => { toggleInfoWindow(device.device_id); });
+		updateIotDeviceMarker(device);
 	}
 
-	devices[iotDevice.device_id].marker.setIcon({
-		url: markerIconUrl,
+}
+
+function updateAndroidDeviceMarker(device) {
+
+	const lastSeen = moment(device.lastUpdate * 1000);
+    let iconUrl = './images/android-device-online-icon.svg';
+	// Check if the device session timed-out and set the appropriate status icon
+    if (moment().diff(lastSeen, 'seconds') > timeOut) iconUrl = './images/android-device-online-icon.svg';
+
+	devices[device.device_id].marker.setIcon({
+		url: iconUrl,
 		scaledSize: new google.maps.Size(40, 46),
 		anchor: new google.maps.Point(20, 46),
 	});
 
-	const now = moment();
-	const lastSeen = moment(iotDevice.lastUpdate * 1000);
+	devices[device.device_id].marker.setPosition({
+		lat: device.lat,
+		lng: device.lng
+	});
 
-	let rangeIcon = '/images/range-active.svg';
-	// If IoT device didn't send sensor data or its session timed out
-	if ((iotDevice.smoke == null && iotDevice.gas == null && iotDevice.temperature == null && iotDevice.uv == null) ||
-	    (now.diff(lastSeen, 'seconds') > 30)) {
-		rangeIcon = '/images/range-deactive.svg';
-	}
+	devices[device.device_id].iw.setContent(getInfoWindowContent(device, 'android'));
+
+}
+
+function updateIotDeviceMarker(iotDevice) {
+
+	const lastSeen = moment(iotDevice.lastUpdate * 1000);
+	let iconUrl = '/images/iot-device-online-icon.svg', rangeIcon = './images/range-online.svg';
+	let emptyPayload = iotDevice.smoke == null && iotDevice.gas == null && iotDevice.temperature == null && iotDevice.uv == null;
+	// Check if the device has triggered any danger event
+	if (iotDevice.dangerLevel == 'DANGER_LEVEL_MEDIUM') iconUrl = './images/iot-medium-danger-icon.svg';
+	if (iotDevice.dangerLevel == 'DANGER_LEVEL_HIGH') iconUrl = './images/iot-high-danger-icon.svg';
+	// Check if IoT device didn't send sensor data or its session timed out
+	if (emptyPayload || moment().diff(lastSeen, 'seconds') > timeOut) rangeIcon = './images/range-offline.svg';
+
+	devices[iotDevice.device_id].marker.setIcon({
+		url: iconUrl,
+		scaledSize: new google.maps.Size(40, 46),
+		anchor: new google.maps.Point(20, 46),
+	});
 
 	devices[iotDevice.device_id].range.setIcon({
 		url: rangeIcon,
@@ -159,38 +161,7 @@ function updateSensorDeviceMarker(iotDevice) {
 		lng: iotDevice.lng
 	});
 
-	const contentString = getInfoWindowContent(iotDevice, 'sensor');
-	devices[iotDevice.device_id].iw.setContent(contentString);
-
-}
-
-function updateAndroidDeviceMarker(androidDevice) {
-
-	const now = moment();
-	const lastSeen = moment(androidDevice.lastUpdate * 1000);
-	// If the device session timed-out
-	if (now.diff(lastSeen, 'seconds') > 30) {
-		devices[androidDevice.device_id].marker.setIcon({
-			url: '/images/android-device-icon-inactive.svg',
-			scaledSize: new google.maps.Size(40, 46),
-			anchor: new google.maps.Point(20, 46),
-		});
-	} else {
-		devices[androidDevice.device_id].marker.setIcon({
-			url: '/images/android-device-icon.svg',
-			scaledSize: new google.maps.Size(40, 46),
-			anchor: new google.maps.Point(20, 46),
-		});
-
-	}
-
-	devices[androidDevice.device_id].marker.setPosition({
-		lat: androidDevice.lat,
-		lng: androidDevice.lng
-	});
-
-	const contentString = getInfoWindowContent(androidDevice, 'android');
-	devices[androidDevice.device_id].iw.setContent(contentString);
+	devices[iotDevice.device_id].iw.setContent(getInfoWindowContent(iotDevice, 'sensor'));
 
 }
 
@@ -201,60 +172,49 @@ function toggleInfoWindow(device_id) {
 
 function getInfoWindowContent(device, deviceType) {
 
-	if (deviceType === 'android') {
-		const now = moment();
-		const lastSeen = moment(device.lastUpdate * 1000);
-		const content = `
-			<div class="iw-content">
-				<div><strong>Device ID: ${device.device_id}</strong></div>
-				<div>Lat: ${device.lat}</div>
-				<div>Lng: ${device.lng}</div>
-				<div>Last seen: ${lastSeen.format('DD/MM/YYYY HH:mm:ss')}</div>
-				<div>Seconds since last update: <br>${now.diff(lastSeen, 'seconds')}</div>
-			</div>
-		`
-		return content;
-	} else {
-		const now = moment();
-		const lastSeen = moment(device.lastUpdate * 1000);
-		let dangerLevelText = "";
+	const lastSeen = moment(device.lastUpdate * 1000);
+	let sensorData = "";
+	if (deviceType === 'sensor') {
+		let dangerMessage = "";
 		if (device.dangerLevel === 'DANGER_LEVEL_HIGH') {
-			dangerLevelText = `
-				<div class='text-high-danger'>Υψηλός κίνδυνος</div>
+			dangerMessage = `
+				<div class='text-high-danger'>High Danger</div>
 				<div class='text-high-danger'>${device.eventMessage}</div>
 				`;
 		} else if (device.dangerLevel === 'DANGER_LEVEL_MEDIUM') {
-			dangerLevelText = `
-				<div class='text-medium-danger'>Μέτριος κίνδυνος</div>
+			dangerMessage = `
+				<div class='text-medium-danger'>Medium Danger</div>
 				<div class='text-medium-danger'>${device.eventMessage}</div>
 				`;
 		}
-		const content = `
-			<div class="iw-content">
-				<div><strong>Device ID: ${device.device_id}</strong></div>
-				${dangerLevelText}
-				<div>Lat: ${device.lat}</div>
-				<div>Lng: ${device.lng}</div>
-				<div>Battery level: ${device.battery_level}</div>
-				<div>Last seen: ${lastSeen.format('DD/MM/YYYY HH:mm:ss')}</div>
-				<div>Seconds since last update: <br>${now.diff(lastSeen, 'seconds')}</div>
-			</div>
+		sensorData = `
+			<div>Battery level: ${device.battery_level}</div>
+			${dangerMessage}
 		`
-		return content;
 	}
+
+	return `
+		<div class="iw-content">
+			<div><strong>Device ID: ${device.device_id}</strong></div>
+			<div>Lat: ${device.lat}</div>
+			<div>Lng: ${device.lng}</div>
+			${sensorData}
+			<div>Last seen: ${lastSeen.format('DD/MM/YYYY HH:mm:ss')}</div>
+			<div>Seconds since last update: ${moment().diff(lastSeen, 'seconds')}</div>
+		</div>
+	`
 
 }
 
-function drawRectangle(sensors) {
+function drawRectangle(sensor1, sensor2) {
 
 	var bounds = new google.maps.LatLngBounds();
-	const sensor1 = new google.maps.LatLng(sensors[0].lat, sensors[0].lng);
-	const sensor2 = new google.maps.LatLng(sensors[1].lat, sensors[1].lng);
-	bounds.extend(sensor1);
-	bounds.extend(sensor2);
-	if (rectangle) {
-		rectangle.setBounds(bounds);
-	} else {
+	const point1 = new google.maps.LatLng(sensor1.lat, sensor1.lng);
+	const point2 = new google.maps.LatLng(sensor2.lat, sensor2.lng);
+	bounds.extend(point1);
+	bounds.extend(point2);
+	if (rectangle) rectangle.setBounds(bounds);
+	else {
 		rectangle = new google.maps.Rectangle({
 			map: map,
 			bounds: bounds,
