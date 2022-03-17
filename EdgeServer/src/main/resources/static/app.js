@@ -58,10 +58,8 @@ function populateMarkers(devicesData) {
 
 function addAndroidDeviceMarker(androidDevice) {
 
-	// If device already exists, update marker position, icon and info window content
-	if (devices[androidDevice.device_id]) {
-		updateAndroidDeviceMarker(androidDevice)
-	} else {
+	// If device doesn't exist, create its context
+	if (!devices[androidDevice.device_id]) {
 		const marker = new google.maps.Marker({map: map,});
 		const infoWindow = new google.maps.InfoWindow({anchor: marker});
 
@@ -74,16 +72,16 @@ function addAndroidDeviceMarker(androidDevice) {
 
 		marker.addListener("click", () => { toggleInfoWindow(androidDevice.device_id); });
 		updateAndroidDeviceMarker(androidDevice);
-	}
+    }
 
+    // Update device info on the map
+    updateAndroidDeviceMarker(androidDevice);
 }
 
 function addIotDeviceMarker(device) {
 
-    // If device already exists, update marker position, icon and info window content
-    if (devices[device.device_id]) {
-		updateIotDeviceMarker(device);
-	} else {
+	// If device doesn't exist, create crete its context
+    if (!devices[device.device_id]) {
 		const marker = new google.maps.Marker({map: map});
 		const infoWindow = new google.maps.InfoWindow({anchor: marker});
 		const rangeMarker = new google.maps.Marker({
@@ -102,7 +100,10 @@ function addIotDeviceMarker(device) {
 		rangeMarker.addListener("click", () => { toggleInfoWindow(device.device_id); });
 		marker.addListener("click", () => { toggleInfoWindow(device.device_id); });
 		updateIotDeviceMarker(device);
-	}
+    }
+
+    // Update device info on the map
+    updateIotDeviceMarker(iotDevice);
 
 }
 
@@ -111,7 +112,7 @@ function updateAndroidDeviceMarker(device) {
 	const lastSeen = moment(device.lastUpdate * 1000);
     let iconUrl = './images/android-device-online-icon.svg';
 	// Check if the device session timed-out and set the appropriate status icon
-    if (moment().diff(lastSeen, 'seconds') > timeOut) iconUrl = './images/android-device-online-icon.svg';
+    if (moment().diff(lastSeen, 'seconds') > timeOut) iconUrl = './images/android-device-offline-icon.svg';
 
 	devices[device.device_id].marker.setIcon({
 		url: iconUrl,
