@@ -65,13 +65,18 @@
   For the server you must create an SQL connection to the server with username set as ```root``` and password set as ```password```. Then you need to create a database scheme with the name ```cp_registry``` in this connection instance. __These credentials are purely for demonstration purposes and can be changed through [application.properties](https://github.com/john-fotis/Civil-Protection/blob/master/EdgeServer/src/main/resources/application.properties) file. It is not recommended you store you Database credentials in public and non encrypted files.__ You also need to have an instance of Mosquitto Broker or any other MQTT broker running on you machine on port ```1883```. Finally Gradle is necessary to build the project.
 
   ## How to run:
-  * Server: In the project root folder open a cmd and type type ``gradle build``. Then to start the server do one of the following:
+
+  ### Server
+  * In the project root folder open a cmd and type type ``gradle build``. Then to start the server do one of the following:
     * Type ```java -jar ./build/libs/server-1.0.0.jar```
     * Type ```gradle bootRun```
-  Alternatively you can build and run the entire project with IntelliJ. After the server has started, the frontend API will be available at <http://localhost:8080/map>
-  * Android applications: Do one of the following:
-    * Install these [APKs](https://github.com/john-fotis/Civil-Protection/tree/master/APKs) in your device or emulator (Need permission for installation from 3rd party applications)
-    * Build and run the applications in Android Studio
+  * Alternatively you can build and run the entire project with IntelliJ.
+
+  __After the server has started, the frontend API will be available at <http://localhost:8080/>__
+
+  ### Android applications
+  * Install these [APKs](https://github.com/john-fotis/Civil-Protection/tree/master/APKs) in your device or emulator ***(Need permission for installation from 3rd party applications)***
+  * Alternatively you can build and run the projects with Android Studio ***(Need to enable USB debugging from developer options)***
 
   ## Project Demonstration:
 
